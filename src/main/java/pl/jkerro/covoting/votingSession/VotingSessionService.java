@@ -26,4 +26,8 @@ public class VotingSessionService {
     public List<VotingSession> findAllVotingSessions() {
         return votingSessionRepository.findAll();
     }
+
+    public void deleteSessionById(Integer id) {
+        votingSessionRepository.deleteById(id);
+    }
 }

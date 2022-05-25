@@ -20,6 +20,15 @@ public class VotingSessionController {
     @PostMapping
     public void createSession(@RequestBody VotingSession votingSession) {
         votingSessionService.createVotingSession(votingSession);
+    }
 
+    @PutMapping
+    public void updateSession(@RequestBody VotingSession votingSession) {
+        votingSessionService.updateVotingSession(votingSession);
+    }
+
+    @DeleteMapping("{id}")
+    public void deleteSessionById(@PathVariable Integer id) {
+        votingSessionService.deleteSessionById(id);
     }
 }
