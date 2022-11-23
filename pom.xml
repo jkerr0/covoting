@@ -14,7 +14,7 @@
     <name>covoting</name>
     <description>covoting</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>18</java.version>
         <frontend-src-dir>${project.basedir}/src/main/frontend</frontend-src-dir>
         <node.version>v12.3.1</node.version>
         <yarn.version>v1.16.0</yarn.version>
@@ -58,12 +58,31 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-amqp</artifactId>
-            <version>2.4.4</version>
+            <version>2.4.7</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.flyway</groupId>
             <artifactId>flyway-maven-plugin</artifactId>
             <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -74,6 +93,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
+                    <source>${java.version}</source>
+                    <source>${java.version}</source>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

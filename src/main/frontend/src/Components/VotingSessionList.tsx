@@ -10,10 +10,10 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { VotingSession } from "../data";
-import axios from "../axios";
-import VotingSessionAddEditForm from "./VotingSessionAddEditForm";
+import axios from "../axios-instance";
+import { VotingSessionAddEditForm } from "./VotingSessionAddEditForm";
 import moment from "moment";
 
 const modalStyle: React.CSSProperties = {
@@ -49,12 +49,13 @@ export default function VotingSessionList() {
     setListUpdated(true);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     axios
       .get(API_URL)
       .then((response) => response.data)
       .then((data) => setVotingSessions(data))
-      .then(() => setListUpdated(false));
+      .then(() => setListUpdated(false))
+      .catch(err => console.error(err))
   }, [listUpdated]);
 
   const handleEdit = (votingSession: VotingSession) => {
@@ -100,7 +101,11 @@ export default function VotingSessionList() {
 
   return (
     <Box>
-      <Button variant="contained" onClick={() => handleOpenAddEditModal(true)}>
+      <Button
+        variant="contained"
+        style={{ margin: "20px" }}
+        onClick={() => handleOpenAddEditModal(true)}
+      >
         Add new
       </Button>
       <TableContainer>

@@ -5,9 +5,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { FC, useState } from "react";
 import { VotingSession } from "../data";
-import axios from "../axios";
+import axios from "../axios-instance";
 import moment from "moment";
 
 interface AddEditFormProps {
@@ -18,33 +18,33 @@ interface AddEditFormProps {
 
 const DATE_FORMAT: string = "yyyy-MM-DDThh:mm";
 
-export default function VotingSessionAddEditForm(props: AddEditFormProps) {
-  const [name, setName] = React.useState<string | undefined>(
-    props.isAdd ? undefined : props.votingSession?.name
+export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({isAdd, votingSession, onSave}) => {
+  const [name, setName] = useState<string | undefined>(
+    isAdd ? undefined : votingSession?.name
   );
-  const [date, setDate] = React.useState<string>(
-    props.isAdd || props.votingSession === undefined
+  const [date, setDate] = useState<string>(
+    isAdd || votingSession === undefined
       ? moment().format(DATE_FORMAT)
-      : moment(props.votingSession.startDate).format(DATE_FORMAT)
+      : moment(votingSession.startDate).format(DATE_FORMAT)
   );
 
   const handleAddEdit = () => {
-    props.isAdd ? handleAdd() : handleEdit();
-    props.onSave();
+    isAdd ? handleAdd() : handleEdit();
+    onSave();
   };
 
   const handleEdit = () => {
     axios.put<VotingSession>("voting_sessions", {
-      id: props.votingSession?.id,
+      id: votingSession?.id,
       name: name,
-      startDate: date,
+      startDate: moment(date).toISOString(),
     });
   };
 
   const handleAdd = () => {
     axios.post<VotingSession>("voting_sessions", {
       name: name,
-      startDate: date,
+      startDate: moment(date).toISOString(),
     });
   };
 
@@ -52,10 +52,11 @@ export default function VotingSessionAddEditForm(props: AddEditFormProps) {
     <Box sx={{ margin: "20px" }}>
       <Stack spacing={2}>
         <Typography variant="h6" component="h2">
-          Add session
+          { isAdd ? 'Add session' : 'Edit session' } 
         </Typography>
         <TextField
           label="Voting session name"
+          placeholder="Name"
           value={name}
           onChange={(event) => setName(event.target.value)}
         ></TextField>
@@ -67,7 +68,6 @@ export default function VotingSessionAddEditForm(props: AddEditFormProps) {
           id="datetime-local"
           label="Voting session start date"
           type="datetime-local"
-          sx={{ width: 250 }}
           InputLabelProps={{
             shrink: true,
           }}
