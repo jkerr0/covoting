@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  postgres:
+    build: postgres
+    container_name: "covoting-postgres"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=covoting
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
