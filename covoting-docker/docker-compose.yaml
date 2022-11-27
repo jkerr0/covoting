@@ -12,3 +12,11 @@ services:
       - "5432:5432"
     volumes:
       - ./db-data:/var/lib/postgresql/data
+  spring:
+    image: 86552b90ddaa828c41c3e1c93b8fc6ca71fb81f126667d2ad19d134b76c73b23
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
