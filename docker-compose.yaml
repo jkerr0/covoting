@@ -13,10 +13,17 @@ services:
     volumes:
       - ./db-data:/var/lib/postgresql/data
   spring:
-    image: 86552b90ddaa828c41c3e1c93b8fc6ca71fb81f126667d2ad19d134b76c73b23
+    image: b4c7872bf862bc698daa4e59d76f7580f116b548bf224b047c8d21254d915d29
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
       - "8080:8080"
     depends_on:
       - postgres
+  frontend:
+    build: src/main/frontend
+    container_name: "covoting-frontend"
+    ports:
+      - "80:80"
+    depends_on:
+      - spring
