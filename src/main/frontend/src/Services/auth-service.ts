@@ -1,4 +1,3 @@
-
 export interface Credentials {
     jwtToken: string,
     tokenType: string
@@ -30,6 +29,10 @@ export const findCredentials = (): OptionalCredentials => {
         return {credentials}
     }
     return {}
+}
+
+export const hasCredentials = (): boolean => {
+    return findCredentials().credentials ? true : false
 }
 
 export const getAuthorizationHeader = (): string => {

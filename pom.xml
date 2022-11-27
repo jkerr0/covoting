@@ -14,7 +14,7 @@
     <name>covoting</name>
     <description>covoting</description>
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
         <frontend-src-dir>${project.basedir}/src/main/frontend</frontend-src-dir>
         <node.version>v12.3.1</node.version>
         <yarn.version>v1.16.0</yarn.version>

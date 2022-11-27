@@ -1,20 +1,23 @@
 import React from "react";
-import "./App.css";
-import { Container } from "@mui/system";
-import VotingSessionList from "./Components/VotingSessionList";
-import LoginForm from "./Components/LoginForm";
-import { LogoutButton } from "./Components/LogoutButton";
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import VotingSessionsPage from "./Pages/VotingSessionsPage";
+import LoginPage from "./Pages/LoginPage";
+import AuthenticatedOnly from "./Components/AuthenticatedOnly";
+import NotFoundPage from "./Pages/NotFoundPage";
+import ErrorPage from "./Pages/ErrorPage";
 
 
 function App() {
 
-
   return (
-      <Container maxWidth="xl">
-        <VotingSessionList></VotingSessionList>
-        <LoginForm></LoginForm>
-        <LogoutButton></LogoutButton>
-      </Container>
+    <BrowserRouter>
+      <Routes>
+        <Route path = '/' element={<AuthenticatedOnly><VotingSessionsPage/></AuthenticatedOnly>}/>
+        <Route path = 'login' element={<LoginPage/>}/>
+        <Route path = 'error' element={<ErrorPage/>}/>
+        <Route path = '*' element = {<NotFoundPage/>}/>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

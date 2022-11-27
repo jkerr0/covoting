@@ -7,14 +7,18 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
+  TablePagination,
   TableRow,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { VotingSession } from "../data";
 import axios from "../axios-instance";
-import { VotingSessionAddEditForm } from "./VotingSessionAddEditForm";
+import VotingSessionAddEditForm from "./VotingSessionAddEditForm";
 import moment from "moment";
+import getHeadersConfig from "../Services/default-headers-provider";
+import useErrorHandler from "../Hooks/useErrorHandler";
 
 const modalStyle: React.CSSProperties = {
   position: "absolute" as "absolute",
@@ -28,16 +32,17 @@ const modalStyle: React.CSSProperties = {
 
 const DATE_FORMAT: string = "DD.MM.yyyy hh:mm";
 
-export default function VotingSessionList() {
+export const VotingSessionList: FC = () => {
   const API_URL: string = "voting_sessions";
 
-  const [votingSessions, setVotingSessions] = React.useState<
-    Array<VotingSession>
-  >([]);
-  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
-  const [isFormAdd, setIsAdd] = React.useState<boolean>(true);
-  const [selected, setSelected] = React.useState<VotingSession | undefined>();
-  const [listUpdated, setListUpdated] = React.useState<boolean>(false);
+  const [votingSessions, setVotingSessions] = useState<Array<VotingSession>>(
+    []
+  );
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [isFormAdd, setIsAdd] = useState<boolean>(true);
+  const [selected, setSelected] = useState<VotingSession | undefined>();
+  const [listUpdated, setListUpdated] = useState<boolean>(false);
+  const defaultErrorHandler = useErrorHandler();
 
   const handleOpenAddEditModal = (add: boolean) => {
     setModalOpen(true);
@@ -51,11 +56,11 @@ export default function VotingSessionList() {
 
   useEffect(() => {
     axios
-      .get(API_URL)
+      .get(API_URL, getHeadersConfig())
       .then((response) => response.data)
       .then((data) => setVotingSessions(data))
       .then(() => setListUpdated(false))
-      .catch(err => console.error(err))
+      .catch(defaultErrorHandler);
   }, [listUpdated]);
 
   const handleEdit = (votingSession: VotingSession) => {
@@ -64,8 +69,9 @@ export default function VotingSessionList() {
   };
   const handleDelete = (votingSession: VotingSession) => {
     axios
-      .delete(API_URL + "/" + votingSession.id)
-      .then(() => setListUpdated(true));
+      .delete(API_URL + "/" + votingSession.id, getHeadersConfig())
+      .then(() => setListUpdated(true))
+      .catch(defaultErrorHandler);
   };
 
   const Row = (votingSession: VotingSession) => {
@@ -93,7 +99,7 @@ export default function VotingSessionList() {
             isAdd={isFormAdd}
             votingSession={selected}
             onSave={handleCloseAddEditModal}
-          ></VotingSessionAddEditForm>
+          />
         </Box>
       </Modal>
     );
@@ -101,13 +107,15 @@ export default function VotingSessionList() {
 
   return (
     <Box>
-      <Button
-        variant="contained"
-        style={{ margin: "20px" }}
-        onClick={() => handleOpenAddEditModal(true)}
-      >
-        Add new
-      </Button>
+      <Box sx={{ display: "flex", justifyContent: "end" }}>
+        <Button
+          variant="contained"
+          style={{ margin: "20px" }}
+          onClick={() => handleOpenAddEditModal(true)}
+        >
+          Add new session
+        </Button>
+      </Box>
       <TableContainer>
         <Table>
           <TableHead>
@@ -118,9 +126,23 @@ export default function VotingSessionList() {
             </TableRow>
           </TableHead>
           <TableBody>{votingSessions.map((session) => Row(session))}</TableBody>
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                rowsPerPageOptions={[10, 15]}
+                rowsPerPage={10}
+                page={0}
+                count={1}
+                onPageChange={() => {}}
+                onRowsPerPageChange={() => {}}
+              />
+            </TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
-      <FormModal></FormModal>
+      <FormModal />
     </Box>
   );
-}
+};
+
+export default VotingSessionList;
