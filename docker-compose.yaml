@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=covoting
     ports:
-      - "5432:5432"
+      - "5432:5433"
     volumes:
       - ./db-data:/var/lib/postgresql/data
   spring:
