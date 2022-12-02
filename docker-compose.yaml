@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  postgres:
+    build: postgres
+    container_name: "covoting-postgres"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=covoting
+    ports:
+      - "5432:5433"
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+  spring:
+    build: .
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+  frontend:
+    build: src/main/frontend
+    container_name: "covoting-frontend"
+    ports:
+      - "80:80"
+    depends_on:
+      - spring
