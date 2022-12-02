@@ -1,20 +1,20 @@
-import { Button } from '@mui/material'
-import React, { FC } from 'react'
-import { deleteCredentials } from '../Services/auth-service'
+import { Button } from "@mui/material";
+import { FC } from "react";
+import { useNavigate } from "react-router-dom";
+import { deleteCredentials } from "../Services/auth-service";
 
-interface LogoutButtonProps {
-    afterLogout?: () => void
-}
+export const LogoutButton: FC = () => {
+  const navigate = useNavigate();
 
-export const LogoutButton: FC<LogoutButtonProps> = ({afterLogout}) => {
-
-    const handleLogout = () => {
-        deleteCredentials()
-        if (afterLogout) {
-            afterLogout()
-        }
-    }
+  const handleLogout = () => {
+    deleteCredentials();
+    navigate("/login");
+  };
   return (
-    <Button onClick={handleLogout} variant="contained">Logout</Button>
-  )
-}
+    <Button onClick={handleLogout} variant="contained">
+      Logout
+    </Button>
+  );
+};
+
+export default LogoutButton;

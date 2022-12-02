@@ -1,11 +1,7 @@
-import axios from 'axios'
-import { getAuthorizationHeader } from './Services/auth-service';
+import axios, { AxiosInstance } from 'axios'
 
-const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080/api',
-    headers: {
-        Authorization: getAuthorizationHeader()
-    }
+const axiosInstance: AxiosInstance = axios.create({
+    baseURL: 'http://localhost:8080/api'
 })
 
 export default axiosInstance;
