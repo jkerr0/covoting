@@ -13,7 +13,7 @@ services:
     volumes:
       - ./db-data:/var/lib/postgresql/data
   spring:
-    image: b4c7872bf862bc698daa4e59d76f7580f116b548bf224b047c8d21254d915d29
+    build: .
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
