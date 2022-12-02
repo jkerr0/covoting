@@ -61,7 +61,7 @@ export const VotingSessionList: FC = () => {
       .then((data) => setVotingSessions(data))
       .then(() => setListUpdated(false))
       .catch(defaultErrorHandler);
-  }, [listUpdated]);
+  }, [listUpdated, defaultErrorHandler]);
 
   const handleEdit = (votingSession: VotingSession) => {
     setSelected(votingSession);
@@ -121,8 +121,8 @@ export const VotingSessionList: FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Action</TableCell>
+              <TableCell>Starts at</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>{votingSessions.map((session) => Row(session))}</TableBody>
