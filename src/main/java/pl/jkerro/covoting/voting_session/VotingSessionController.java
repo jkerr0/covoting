@@ -18,8 +18,9 @@ public class VotingSessionController {
     }
 
     @PostMapping
-    public void createSession(@RequestBody VotingSession votingSession) {
+    public VotingSession createSession(@RequestBody VotingSession votingSession) {
         votingSessionService.createVotingSession(votingSession);
+        return votingSession;
     }
 
     @PutMapping

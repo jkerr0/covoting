@@ -16,7 +16,7 @@ const useErrorHandler = () => {
       console.error(error);
       navigate("/error");
     }
-  }, [error]);
+  }, [error, navigate]);
   return setError;
 };
 

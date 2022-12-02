@@ -41,17 +41,25 @@ export const VotingSessionList: FC = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isFormAdd, setIsAdd] = useState<boolean>(true);
   const [selected, setSelected] = useState<VotingSession | undefined>();
-  const [listUpdated, setListUpdated] = useState<boolean>(false);
   const defaultErrorHandler = useErrorHandler();
 
   const handleOpenAddEditModal = (add: boolean) => {
     setModalOpen(true);
     setIsAdd(add);
   };
+
+  const handleSave = (votingSession: VotingSession) => {
+    setVotingSessions((currentList) => [
+      ...currentList.filter(
+        (existingSession) => existingSession.id !== votingSession.id
+      ),
+      votingSession,
+    ]);
+    handleCloseAddEditModal();
+  };
   const handleCloseAddEditModal = () => {
     setModalOpen(false);
     setSelected(undefined);
-    setListUpdated(true);
   };
 
   useEffect(() => {
@@ -59,9 +67,8 @@ export const VotingSessionList: FC = () => {
       .get(API_URL, getHeadersConfig())
       .then((response) => response.data)
       .then((data) => setVotingSessions(data))
-      .then(() => setListUpdated(false))
       .catch(defaultErrorHandler);
-  }, [listUpdated, defaultErrorHandler]);
+  }, [defaultErrorHandler]);
 
   const handleEdit = (votingSession: VotingSession) => {
     setSelected(votingSession);
@@ -70,7 +77,7 @@ export const VotingSessionList: FC = () => {
   const handleDelete = (votingSession: VotingSession) => {
     axios
       .delete(API_URL + "/" + votingSession.id, getHeadersConfig())
-      .then(() => setListUpdated(true))
+      .then(() => setVotingSessions(currentList => [...currentList.filter(existing => existing.id !== votingSession.id)]))
       .catch(defaultErrorHandler);
   };
 
@@ -98,7 +105,7 @@ export const VotingSessionList: FC = () => {
           <VotingSessionAddEditForm
             isAdd={isFormAdd}
             votingSession={selected}
-            onSave={handleCloseAddEditModal}
+            onSave={handleSave}
           />
         </Box>
       </Modal>
@@ -129,7 +136,7 @@ export const VotingSessionList: FC = () => {
           <TableFooter>
             <TableRow>
               <TablePagination
-                rowsPerPageOptions={[10, 15]}
+                rowsPerPageOptions={[10]}
                 rowsPerPage={10}
                 page={0}
                 count={1}

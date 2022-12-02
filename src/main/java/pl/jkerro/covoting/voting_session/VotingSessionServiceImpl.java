@@ -22,7 +22,6 @@ public class VotingSessionServiceImpl implements VotingSessionService {
             throw new IllegalArgumentException("id cannot be null");
         }
         votingSessionRepository.save(session);
-
     }
 
     @Override

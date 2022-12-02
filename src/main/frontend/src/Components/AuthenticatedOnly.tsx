@@ -14,7 +14,7 @@ const AuthenticatedOnly: FC<AuthenticatedOnlyProps> = ({ children }) => {
     if (isNotAuthenticated()) {
       navigate("/login");
     }
-  }, []);
+  }, [navigate]);
 
   return children;
 };

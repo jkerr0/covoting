@@ -9,7 +9,7 @@ import useErrorHandler from "../Hooks/useErrorHandler";
 interface AddEditFormProps {
   isAdd: boolean;
   votingSession?: VotingSession;
-  onSave: Function;
+  onSave: (v: VotingSession) => void;
 }
 
 const DATE_FORMAT: string = "yyyy-MM-DDThh:mm";
@@ -30,35 +30,39 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
 
   const handleAddEdit = () => {
     isAdd ? handleAdd() : handleEdit();
-    onSave();
   };
 
   const defaultErrorHandler = useErrorHandler();
 
   const handleEdit = () => {
+    if (!votingSession?.id || name === undefined) {
+      throw new Error('Invalid edited session')
+    }
+    const editedSession: VotingSession = {
+          id: votingSession.id,
+          name,
+          startDate: moment(date).toISOString(),
+    }
     axios
       .put<VotingSession>(
         "voting_sessions",
-        {
-          id: votingSession?.id,
-          name: name,
-          startDate: moment(date).toISOString(),
-        },
+        editedSession,
         getHeadersConfig()
       )
+      .then(() => onSave(editedSession))
       .catch(defaultErrorHandler);
   };
 
   const handleAdd = () => {
+    const newSession = {
+      name: name,
+      startDate: moment(date).toISOString(),
+    };
+
     axios
-      .post<VotingSession>(
-        "voting_sessions",
-        {
-          name: name,
-          startDate: moment(date).toISOString(),
-        },
-        getHeadersConfig()
-      )
+      .post<VotingSession>("voting_sessions", newSession, getHeadersConfig())
+      .then(res => res.data)
+      .then(onSave)
       .catch(defaultErrorHandler);
   };
 
