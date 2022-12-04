@@ -1,18 +1,19 @@
 import { Container } from "@mui/material";
 import { FC } from "react";
-import LogoutButton from "../Components/LogoutButton";
 import PageHeader from "../Components/PageHeader";
 import VotingSessionList from "../Components/VotingSessionList";
+import WithNavbar from "../Components/WithNavbar";
 
 const VotingSessionsPage: FC = () => {
   return (
-    <Container maxWidth="xl">
-      <LogoutButton></LogoutButton>
-      <PageHeader>Voting sessions</PageHeader>
-      <Container maxWidth='lg'>
-        <VotingSessionList></VotingSessionList>
+    <WithNavbar>
+      <Container maxWidth="xl">
+        <PageHeader>Voting sessions</PageHeader>
+        <Container maxWidth="lg">
+          <VotingSessionList/>
+        </Container>
       </Container>
-    </Container>
+    </WithNavbar>
   );
 };
 
