@@ -2,6 +2,7 @@ version: "3.7"
 
 services:
   postgres:
+    image: jkerr0/covoting-postgres
     build: postgres
     container_name: "covoting-postgres"
     environment:
@@ -13,6 +14,7 @@ services:
     volumes:
       - ./db-data:/var/lib/postgresql/data
   spring:
+    image: jkerr0/covoting-spring
     build: .
     environment:
       - SPRING_PROFILES_ACTIVE=prod
@@ -21,6 +23,7 @@ services:
     depends_on:
       - postgres
   frontend:
+    image: jkerr0/covoting-frontend
     build: src/main/frontend
     container_name: "covoting-frontend"
     ports:
