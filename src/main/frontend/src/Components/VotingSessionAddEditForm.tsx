@@ -1,18 +1,25 @@
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import { FC, useState } from "react";
-import { MajorityType, Voting, VotingSession } from "../data";
-import axios from "../axios-instance";
+import { MajorityType, Voting, VotingSession } from "Utils/data";
 import moment from "moment";
-import getHeadersConfig from "../Services/default-headers-provider";
-import useErrorHandler from "../Hooks/useErrorHandler";
+import useErrorHandler from "Hooks/useErrorHandler";
 import AddIcon from "@mui/icons-material/Add";
-import useEntityWithSeqList from "../Hooks/useEntityWithSeqList";
-import VotingCard from "./VotingCard";
+import useEntityWithSeqList from "Hooks/useEntityWithSeqList";
+import VotingCard from "Components/VotingCard";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import {
+  getVotingSessionVotingList,
+  NewVotingSession,
+  postVotingSession,
+  putVotingSession,
+} from "Services/voting-session-api-service";
+import Queries from "Utils/queries";
+import { AxiosError } from "axios";
 
 interface AddEditFormProps {
   isAdd: boolean;
   votingSession?: VotingSession;
-  onSave: (v: VotingSession) => void;
+  afterSave: () => void;
 }
 
 const DATE_FORMAT: string = "yyyy-MM-DDThh:mm";
@@ -20,9 +27,9 @@ const DATE_FORMAT: string = "yyyy-MM-DDThh:mm";
 export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
   isAdd,
   votingSession,
-  onSave,
+  afterSave,
 }) => {
-  const [votings, , addVoting, updateVoting, deleteVoting] =
+  const [votingList, setVotingList, addVoting, updateVoting, deleteVoting, votingDown, votingUp] =
     useEntityWithSeqList<Voting>();
 
   const [name, setName] = useState<string | undefined>(
@@ -33,12 +40,42 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
       ? moment().format(DATE_FORMAT)
       : moment(votingSession.startDate).format(DATE_FORMAT)
   );
+  const defaultErrorHandler = useErrorHandler();
+
+  const afterMutationSuccess = () => {
+    queryClient.invalidateQueries([
+      Queries.VOTING_SESSIONS,
+      getVotingListQueryName(),
+    ]);
+    afterSave();
+  };
+
+  const queryClient = useQueryClient();
+  const addMutation = useMutation(postVotingSession, {
+    onSuccess: afterMutationSuccess,
+    onError: defaultErrorHandler,
+  });
+
+  const editMutation = useMutation(putVotingSession, {
+    onSuccess: afterMutationSuccess,
+    onError: defaultErrorHandler,
+  });
+
+  const getVotingListQueryName = () => `voting-list-${votingSession?.id}`;
+
+  const { error } = useQuery<Voting[], AxiosError>(
+    getVotingListQueryName(),
+    () => getVotingSessionVotingList(votingSession),
+    {
+      enabled: !!votingSession,
+      onSuccess: (votingList) => setVotingList(votingList),
+    }
+  );
+  useErrorHandler(error);
 
   const handleSave = () => {
     isAdd ? handleSaveAdd() : handleSaveEdit();
   };
-
-  const defaultErrorHandler = useErrorHandler();
 
   const handleSaveEdit = () => {
     if (!votingSession?.id || name === undefined) {
@@ -48,32 +85,30 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
       id: votingSession.id,
       name,
       startDate: moment(date).toISOString(),
+      votingList,
     };
-    axios
-      .put<VotingSession>("voting_sessions", editedSession, getHeadersConfig())
-      .then(() => onSave(editedSession))
-      .catch(defaultErrorHandler);
-  };
-
-  const handleVotingAdd = () => {
-    addVoting({
-      seq: 0,
-      name: "",
-      majorityType: MajorityType.SIMPLE
-    });
+    editMutation.mutate(editedSession);
   };
 
   const handleSaveAdd = () => {
-    const newSession = {
-      name: name,
+    if (!name) {
+      throw new Error("Name not defined");
+    }
+    const newSession: NewVotingSession = {
+      name,
       startDate: moment(date).toISOString(),
+      votingList,
     };
+    addMutation.mutate(newSession);
+  };
 
-    axios
-      .post<VotingSession>("voting_sessions", newSession, getHeadersConfig())
-      .then((res) => res.data)
-      .then(onSave)
-      .catch(defaultErrorHandler);
+  const handleVotingAdd = () => {
+    const defaultVoting: Voting = {
+      seq: 0,
+      name: "",
+      majorityType: MajorityType.SIMPLE,
+    };
+    addVoting(defaultVoting);
   };
 
   return (
@@ -100,13 +135,15 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
             shrink: true,
           }}
         />
-        {votings.map((voting, index) => (
+        {votingList.map((voting, index) => (
           <VotingCard
-            key={index}
+            key={`voting-${index}`}
             voting={voting}
             onVotingChanged={updateVoting}
             onVotingDelete={deleteVoting}
-          ></VotingCard>
+            onVotingDown={votingDown}
+            onVotingUp={votingUp}
+          />
         ))}
         <Button onClick={handleVotingAdd}>
           <AddIcon />

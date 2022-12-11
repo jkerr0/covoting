@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import { getAuthorizationHeader } from "./auth-service";
+import { getAuthorizationHeader } from "Services/auth-service";
 
 const getHeadersConfig = (): AxiosRequestConfig => {
     return {

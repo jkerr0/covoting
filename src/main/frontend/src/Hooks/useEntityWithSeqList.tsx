@@ -1,9 +1,11 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { WithSeq } from "../data";
+import { useState } from "react";
+import { WithSeq } from "Utils/data";
 
 const useEntityWithSeqList = <T extends WithSeq>(): [
   Array<T>,
   (t: T[]) => void,
+  (t: T) => void,
+  (t: T) => void,
   (t: T) => void,
   (t: T) => void,
   (t: T) => void
@@ -12,7 +14,7 @@ const useEntityWithSeqList = <T extends WithSeq>(): [
   const [maxSeq, setMaxSeq] = useState<number>(1);
 
   const deleteItem = (item: T) => {
-    setMaxSeq(currentMaxSeq => currentMaxSeq - 1)
+    setMaxSeq((currentMaxSeq) => currentMaxSeq - 1);
     setList((currentList) =>
       currentList
         .filter((existingItem) => existingItem.seq !== item.seq)
@@ -38,12 +40,48 @@ const useEntityWithSeqList = <T extends WithSeq>(): [
     setList((currentList) => [...currentList, item]);
   };
 
-  const initializeList = (items: T[]) => {
-    setMaxSeq(items.length)
-    setList(items)
-  }
+  const itemUp = (item: T) => {
+    if (item.seq === 1) {
+      return;
+    }
 
-  return [list, initializeList, addItem, updateItem, deleteItem];
+    setList((currentList) => {
+      const newList = [...currentList];
+      const upElementInx = item.seq - 2;
+      const currElementInx = item.seq - 1;
+      const upElement = newList[upElementInx];
+      item.seq = item.seq - 1;
+      upElement.seq = upElement.seq + 1;
+      newList[upElementInx] = item;
+      newList[currElementInx] = upElement;
+      return newList;
+    });
+  };
+
+  const itemDown = (item: T) => {
+    if (item.seq === maxSeq - 1) {
+      return;
+    }
+
+    setList((currentList) => {
+      const newList = [...currentList];
+      const downElementInx = item.seq;
+      const currElementInx = item.seq - 1;
+      const downElement = newList[downElementInx];
+      item.seq = item.seq + 1;
+      downElement.seq = downElement.seq - 1;
+      newList[downElementInx] = item;
+      newList[currElementInx] = downElement;
+      return newList;
+    });
+  };
+
+  const initializeList = (items: T[]) => {
+    setMaxSeq(items.length || 1);
+    setList(items);
+  };
+
+  return [list, initializeList, addItem, updateItem, deleteItem, itemDown, itemUp];
 };
 
 export default useEntityWithSeqList;

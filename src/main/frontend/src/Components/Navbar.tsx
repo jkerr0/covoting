@@ -1,6 +1,6 @@
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import { FC } from "react";
-import LogoutButton from "./LogoutButton";
+import LogoutButton from "Components/LogoutButton";
 import MenuIcon from '@mui/icons-material/Menu';
 
 interface NavbarProps {

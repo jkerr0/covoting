@@ -10,23 +10,31 @@ import {
   SelectChangeEvent,
   Stack,
   TextField,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import Card from "@mui/material/Card/Card";
 import { ChangeEvent, FC } from "react";
-import { MajorityType, Voting } from "../data";
+import { MajorityType, Voting } from "Utils/data";
 import Typography from "@mui/material/Typography";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 
 interface VotingCardProps {
   voting: Voting;
   onVotingChanged: (voting: Voting) => void;
   onVotingDelete: (voting: Voting) => void;
+  onVotingUp: (voting: Voting) => void;
+  onVotingDown: (voting: Voting) => void;
 }
 
 const VotingCard: FC<VotingCardProps> = ({
   voting: votingInit,
   onVotingChanged,
   onVotingDelete,
+  onVotingDown,
+  onVotingUp
 }) => {
   const handleNameUpdate = (event: ChangeEvent<HTMLInputElement>) => {
     onVotingChanged({
@@ -53,11 +61,26 @@ const VotingCard: FC<VotingCardProps> = ({
     </Button>
   );
 
+  const UpButton = () => (
+    <Button onClick={() => onVotingUp(votingInit)}>
+      <ArrowUpwardIcon />
+    </Button>
+  );
+
+  const DownButton = () => (
+    <Button onClick={() => onVotingDown(votingInit)}>
+      <ArrowDownwardIcon />
+    </Button>
+  );
+
+  const theme = useTheme()
+  const smallBreakpoint = useMediaQuery(theme.breakpoints.down("md"))
+
   return (
     <Card>
       <CardContent>
         <Typography>{cardTitle}</Typography>
-        <Grid container alignItems="center" justifyContent="space-evenly">
+        <Grid container alignItems="center" justifyContent="space-evenly" spacing={1}>
           <Grid item xl={10}>
             <Stack spacing={2}>
               <TextField
@@ -71,10 +94,11 @@ const VotingCard: FC<VotingCardProps> = ({
                 <Select
                   labelId="majority-field-label"
                   label="Majority type"
+                  value={votingInit.majorityType}
                   onChange={handleMajorityTypeUpdate}
                 >
                   {Object.values(MajorityType).map((majorityType) => (
-                    <MenuItem value={majorityType}>
+                    <MenuItem key={majorityType} value={majorityType}>
                       {capitalize(majorityType)}
                     </MenuItem>
                   ))}
@@ -89,7 +113,17 @@ const VotingCard: FC<VotingCardProps> = ({
             </Stack>
           </Grid>
           <Grid item xl={1}>
-            <DeleteButton />
+            <Grid container spacing={2} direction={smallBreakpoint ? 'row':'column'}>
+              <Grid item>
+                <UpButton />
+              </Grid>
+              <Grid item>
+                <DeleteButton />
+              </Grid>
+              <Grid item>
+                <DownButton />
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </CardContent>

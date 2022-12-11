@@ -1,11 +1,15 @@
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { deleteCredentials } from "../Services/auth-service";
+import { deleteCredentials } from "Services/auth-service";
 
-const useErrorHandler = () => {
+const useErrorHandler = (errorParam?: AxiosError | null) => {
   const [error, setError] = useState<AxiosError | undefined>();
   const navigate = useNavigate();
+  useEffect(() => {
+    errorParam && setError(errorParam);
+  }, [errorParam]);
+
   useEffect(() => {
     if (!error) {
       return;

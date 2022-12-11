@@ -8,16 +8,18 @@ export interface WithSeq {
 export interface VotingSession extends WithId {
     name: string,
     startDate: string
+    votingList: Voting[]
 }
 
 export enum MajorityType {
-    SIMPLE = 'simple',
-    ABSOLUTE = 'absolute',
-    EFFECTIVE = 'effective',
-    UNANIMITY = 'unanimity'
+    SIMPLE = 'SIMPLE',
+    ABSOLUTE = 'ABSOLUTE',
+    EFFECTIVE = 'EFFECTIVE',
+    UNANIMITY = 'UNANIMITY'
 }
 
 export interface Voting extends WithSeq {
+    id?: number,
     name: string,
     majorityType: MajorityType,
 }

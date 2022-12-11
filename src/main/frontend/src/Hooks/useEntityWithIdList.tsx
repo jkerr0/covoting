@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { WithId } from "../data";
+import { WithId } from "Utils/data";
 
 const useEntityWithIdList = <T extends WithId>(): [
   Array<T>,

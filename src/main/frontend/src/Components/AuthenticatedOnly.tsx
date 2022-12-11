@@ -1,5 +1,5 @@
 import { FC, ReactElement, useEffect } from "react";
-import { findCredentials } from "../Services/auth-service";
+import { findCredentials } from "Services/auth-service";
 import { useNavigate } from "react-router-dom";
 
 interface AuthenticatedOnlyProps {
@@ -7,6 +7,11 @@ interface AuthenticatedOnlyProps {
 }
 
 const AuthenticatedOnly: FC<AuthenticatedOnlyProps> = ({ children }) => {
+  useCredentialsOrRedirectToLogin();
+  return children;
+};
+
+const useCredentialsOrRedirectToLogin = () => {
   const navigate = useNavigate();
   const isNotAuthenticated = (): boolean => !findCredentials().credentials;
 
@@ -15,8 +20,6 @@ const AuthenticatedOnly: FC<AuthenticatedOnlyProps> = ({ children }) => {
       navigate("/login");
     }
   }, [navigate]);
-
-  return children;
-};
+}
 
 export default AuthenticatedOnly;
