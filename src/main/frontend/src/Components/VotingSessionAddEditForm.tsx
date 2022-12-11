@@ -1,10 +1,13 @@
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import { FC, useState } from "react";
-import { VotingSession } from "../data";
+import { MajorityType, Voting, VotingSession } from "../data";
 import axios from "../axios-instance";
 import moment from "moment";
 import getHeadersConfig from "../Services/default-headers-provider";
 import useErrorHandler from "../Hooks/useErrorHandler";
+import AddIcon from "@mui/icons-material/Add";
+import useEntityWithSeqList from "../Hooks/useEntityWithSeqList";
+import VotingCard from "./VotingCard";
 
 interface AddEditFormProps {
   isAdd: boolean;
@@ -19,6 +22,9 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
   votingSession,
   onSave,
 }) => {
+  const [votings, , addVoting, updateVoting, deleteVoting] =
+    useEntityWithSeqList<Voting>();
+
   const [name, setName] = useState<string | undefined>(
     isAdd ? undefined : votingSession?.name
   );
@@ -28,32 +34,36 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
       : moment(votingSession.startDate).format(DATE_FORMAT)
   );
 
-  const handleAddEdit = () => {
-    isAdd ? handleAdd() : handleEdit();
+  const handleSave = () => {
+    isAdd ? handleSaveAdd() : handleSaveEdit();
   };
 
   const defaultErrorHandler = useErrorHandler();
 
-  const handleEdit = () => {
+  const handleSaveEdit = () => {
     if (!votingSession?.id || name === undefined) {
-      throw new Error('Invalid edited session')
+      throw new Error("Invalid edited session");
     }
     const editedSession: VotingSession = {
-          id: votingSession.id,
-          name,
-          startDate: moment(date).toISOString(),
-    }
+      id: votingSession.id,
+      name,
+      startDate: moment(date).toISOString(),
+    };
     axios
-      .put<VotingSession>(
-        "voting_sessions",
-        editedSession,
-        getHeadersConfig()
-      )
+      .put<VotingSession>("voting_sessions", editedSession, getHeadersConfig())
       .then(() => onSave(editedSession))
       .catch(defaultErrorHandler);
   };
 
-  const handleAdd = () => {
+  const handleVotingAdd = () => {
+    addVoting({
+      seq: 0,
+      name: "",
+      majorityType: MajorityType.SIMPLE
+    });
+  };
+
+  const handleSaveAdd = () => {
     const newSession = {
       name: name,
       startDate: moment(date).toISOString(),
@@ -61,13 +71,13 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
 
     axios
       .post<VotingSession>("voting_sessions", newSession, getHeadersConfig())
-      .then(res => res.data)
+      .then((res) => res.data)
       .then(onSave)
       .catch(defaultErrorHandler);
   };
 
   return (
-    <Box sx={{ margin: "20px" }}>
+    <Box sx={{ m: 2, p: 5 }}>
       <Stack spacing={2}>
         <Typography variant="h6" component="h2">
           {isAdd ? "Add session" : "Edit session"}
@@ -90,7 +100,19 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
             shrink: true,
           }}
         />
-        <Button onClick={handleAddEdit} variant="contained">
+        {votings.map((voting, index) => (
+          <VotingCard
+            key={index}
+            voting={voting}
+            onVotingChanged={updateVoting}
+            onVotingDelete={deleteVoting}
+          ></VotingCard>
+        ))}
+        <Button onClick={handleVotingAdd}>
+          <AddIcon />
+          Add voting
+        </Button>
+        <Button onClick={handleSave} variant="contained">
           Save
         </Button>
       </Stack>

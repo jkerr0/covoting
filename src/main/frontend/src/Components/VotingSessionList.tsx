@@ -19,15 +19,19 @@ import VotingSessionAddEditForm from "./VotingSessionAddEditForm";
 import moment from "moment";
 import getHeadersConfig from "../Services/default-headers-provider";
 import useErrorHandler from "../Hooks/useErrorHandler";
+import useEntityWithIdList from "../Hooks/useEntityWithIdList";
 
 const modalStyle: React.CSSProperties = {
+  display: 'block',
   position: "absolute" as "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  minWidth: '35vw',
   backgroundColor: "white",
   border: "none",
+  maxHeight: '80vh',
+  overflow: 'auto'
 };
 
 const DATE_FORMAT: string = "DD.MM.yyyy hh:mm";
@@ -35,9 +39,7 @@ const DATE_FORMAT: string = "DD.MM.yyyy hh:mm";
 export const VotingSessionList: FC = () => {
   const API_URL: string = "voting_sessions";
 
-  const [votingSessions, setVotingSessions] = useState<Array<VotingSession>>(
-    []
-  );
+  const [votingSessions, setVotingSessions, saveSession, deleteSession] = useEntityWithIdList<VotingSession>()
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isFormAdd, setIsAdd] = useState<boolean>(true);
   const [selected, setSelected] = useState<VotingSession | undefined>();
@@ -49,12 +51,7 @@ export const VotingSessionList: FC = () => {
   };
 
   const handleSave = (votingSession: VotingSession) => {
-    setVotingSessions((currentList) => [
-      ...currentList.filter(
-        (existingSession) => existingSession.id !== votingSession.id
-      ),
-      votingSession,
-    ]);
+    saveSession(votingSession)
     handleCloseAddEditModal();
   };
   const handleCloseAddEditModal = () => {
@@ -77,7 +74,7 @@ export const VotingSessionList: FC = () => {
   const handleDelete = (votingSession: VotingSession) => {
     axios
       .delete(API_URL + "/" + votingSession.id, getHeadersConfig())
-      .then(() => setVotingSessions(currentList => [...currentList.filter(existing => existing.id !== votingSession.id)]))
+      .then(() => deleteSession(votingSession))
       .catch(defaultErrorHandler);
   };
 
