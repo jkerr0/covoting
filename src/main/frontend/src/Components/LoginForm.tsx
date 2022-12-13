@@ -9,9 +9,9 @@ import {
 import { AxiosError } from "axios";
 import { FC, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axiosInstance from "../axios-instance";
-import { storeCredentials, Credentials } from "../Services/auth-service";
-import getHeadersConfig from "../Services/default-headers-provider";
+import { storeCredentials, Credentials } from "Services/auth-service";
+import { useMutation } from "react-query";
+import { postLogin } from "Services/auth-api-service";
 
 export const LoginForm: FC = () => {
   const [invalidCredentials, isInvalidCredentials] = useState<boolean>(false);
@@ -29,20 +29,16 @@ export const LoginForm: FC = () => {
     }
   };
 
+  const loginMutation = useMutation(postLogin, {
+    onSuccess: (credentials: Credentials) => {
+      storeCredentials(credentials);
+      navigate("/");
+    },
+    onError: handleLoginError,
+  });
+
   const handleFormSubmit = () => {
-    axiosInstance
-      .post(
-        "/auth/login",
-        {
-          email,
-          password,
-        },
-        getHeadersConfig()
-      )
-      .then((res) => res.data as Credentials)
-      .then(storeCredentials)
-      .then(() => navigate("/"))
-      .catch(handleLoginError);
+    loginMutation.mutate({ email, password });
   };
 
   return (

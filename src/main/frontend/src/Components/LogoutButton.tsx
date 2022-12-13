@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import { FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { deleteCredentials } from "../Services/auth-service";
+import { deleteCredentials } from "Services/auth-service";
 
 export const LogoutButton: FC = () => {
   const navigate = useNavigate();

@@ -12,32 +12,35 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import React, { FC, useEffect, useState } from "react";
-import { VotingSession } from "../data";
-import axios from "../axios-instance";
+import React, { FC, useState } from "react";
+import { VotingSession } from "Utils/data";
 import VotingSessionAddEditForm from "./VotingSessionAddEditForm";
 import moment from "moment";
-import getHeadersConfig from "../Services/default-headers-provider";
-import useErrorHandler from "../Hooks/useErrorHandler";
+import useErrorHandler from "Hooks/useErrorHandler";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import {
+  deleteVotingSession,
+  getVotingSessions,
+} from "Services/voting-session-api-service";
+import Queries from "Utils/queries";
+import { AxiosError } from "axios";
 
 const modalStyle: React.CSSProperties = {
+  display: "block",
   position: "absolute" as "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  minWidth: "35vw",
   backgroundColor: "white",
   border: "none",
+  maxHeight: "80vh",
+  overflow: "auto",
 };
 
 const DATE_FORMAT: string = "DD.MM.yyyy hh:mm";
 
 export const VotingSessionList: FC = () => {
-  const API_URL: string = "voting_sessions";
-
-  const [votingSessions, setVotingSessions] = useState<Array<VotingSession>>(
-    []
-  );
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isFormAdd, setIsAdd] = useState<boolean>(true);
   const [selected, setSelected] = useState<VotingSession | undefined>();
@@ -48,13 +51,7 @@ export const VotingSessionList: FC = () => {
     setIsAdd(add);
   };
 
-  const handleSave = (votingSession: VotingSession) => {
-    setVotingSessions((currentList) => [
-      ...currentList.filter(
-        (existingSession) => existingSession.id !== votingSession.id
-      ),
-      votingSession,
-    ]);
+  const handleSave = () => {
     handleCloseAddEditModal();
   };
   const handleCloseAddEditModal = () => {
@@ -62,23 +59,28 @@ export const VotingSessionList: FC = () => {
     setSelected(undefined);
   };
 
-  useEffect(() => {
-    axios
-      .get(API_URL, getHeadersConfig())
-      .then((response) => response.data)
-      .then((data) => setVotingSessions(data))
-      .catch(defaultErrorHandler);
-  }, [defaultErrorHandler]);
+  const queryClient = useQueryClient();
+
+  const {
+    data: votingSessions,
+    error,
+  } = useQuery<VotingSession[], AxiosError>(
+    Queries.VOTING_SESSIONS,
+    getVotingSessions
+  );
+
+  useErrorHandler(error);
+
+  const deleteMutation = useMutation(deleteVotingSession, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(Queries.VOTING_SESSIONS);
+    },
+    onError: defaultErrorHandler,
+  });
 
   const handleEdit = (votingSession: VotingSession) => {
     setSelected(votingSession);
     handleOpenAddEditModal(false);
-  };
-  const handleDelete = (votingSession: VotingSession) => {
-    axios
-      .delete(API_URL + "/" + votingSession.id, getHeadersConfig())
-      .then(() => setVotingSessions(currentList => [...currentList.filter(existing => existing.id !== votingSession.id)]))
-      .catch(defaultErrorHandler);
   };
 
   const Row = (votingSession: VotingSession) => {
@@ -91,7 +93,9 @@ export const VotingSessionList: FC = () => {
         <TableCell>
           <ButtonGroup>
             <Button onClick={() => handleEdit(votingSession)}>Edit</Button>
-            <Button onClick={() => handleDelete(votingSession)}>Delete</Button>
+            <Button onClick={() => deleteMutation.mutate(votingSession)}>
+              Delete
+            </Button>
           </ButtonGroup>
         </TableCell>
       </TableRow>
@@ -105,7 +109,7 @@ export const VotingSessionList: FC = () => {
           <VotingSessionAddEditForm
             isAdd={isFormAdd}
             votingSession={selected}
-            onSave={handleSave}
+            afterSave={handleSave}
           />
         </Box>
       </Modal>
@@ -129,10 +133,12 @@ export const VotingSessionList: FC = () => {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Starts at</TableCell>
-              <TableCell></TableCell>
+              <TableCell/>
             </TableRow>
           </TableHead>
-          <TableBody>{votingSessions.map((session) => Row(session))}</TableBody>
+          <TableBody>
+            {votingSessions && votingSessions.map((session) => Row(session))}
+          </TableBody>
           <TableFooter>
             <TableRow>
               <TablePagination

@@ -1,11 +1,11 @@
 import { FC } from "react";
-import CenteredBox from "../Components/CenteredContainer";
-import LoginForm from "../Components/LoginForm";
+import CenteredBox from "Components/CenteredContainer";
+import LoginForm from "Components/LoginForm";
 
 const LoginPage: FC = () => {
   return (
     <CenteredBox maxWidth="sm">
-      <LoginForm></LoginForm>
+      <LoginForm/>
     </CenteredBox>
   );
 };

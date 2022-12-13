@@ -1,6 +1,6 @@
 import { Button, Stack, Typography } from "@mui/material";
 import { FC } from "react";
-import CenteredContainer from "../Components/CenteredContainer";
+import CenteredContainer from "Components/CenteredContainer";
 
 const NotFoundPage: FC = () => {
   return (

@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
-import React, { FC, ReactElement, useState } from "react";
-import Navbar from "./Navbar";
-import SideMenu from "./SideMenu";
+import { FC, ReactElement, useState } from "react";
+import Navbar from "Components/Navbar";
+import SideMenu from "Components/SideMenu";
 
 interface WithNavbarProps {
   children: ReactElement;

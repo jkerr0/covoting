@@ -17,6 +17,11 @@ public class VotingSessionController {
         return votingSessionService.findAllVotingSessions();
     }
 
+    @GetMapping("{id}/voting_list")
+    public List<Voting> getSessionVotingList(@PathVariable Integer id) {
+        return votingSessionService.findVotingListBySession(id);
+    }
+
     @PostMapping
     public VotingSession createSession(@RequestBody VotingSession votingSession) {
         votingSessionService.createVotingSession(votingSession);

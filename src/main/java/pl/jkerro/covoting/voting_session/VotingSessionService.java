@@ -11,4 +11,6 @@ public interface VotingSessionService {
     List<VotingSession> findAllVotingSessions();
 
     void deleteSessionById(Integer id);
+
+    List<Voting> findVotingListBySession(Integer votingSessionId);
 }
