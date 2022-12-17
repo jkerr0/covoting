@@ -3,6 +3,7 @@ package pl.jkerro.covoting.authentication;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,18 +15,20 @@ import java.util.function.Function;
 @Service
 public class JwtTokenService {
 
+    @Getter
     @Value("${jwt.secret}")
     private String secret;
 
+    @Getter
     @Value("${jwt.expirationMs}")
-    private Integer tokenExpirationMs;
+    private String tokenExpirationMs;
 
     public String generateToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + tokenExpirationMs))
+                .setExpiration(new Date(new Date().getTime() + Integer.parseInt(getTokenExpirationMs())))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
@@ -33,7 +36,7 @@ public class JwtTokenService {
     public <T> T getClaimFromToken(String token, Function<Claims, T> resolver) {
         return resolver.apply(
                 Jwts.parser()
-                        .setSigningKey(secret)
+                        .setSigningKey(getSecret())
                         .parseClaimsJws(token)
                         .getBody());
     }

@@ -1,25 +1,33 @@
 import axiosInstance from "Utils/axios-instance";
 import { Voting, VotingSession } from "Utils/data";
 import getHeadersConfig from "Services/default-headers-provider";
+import { findCredentials } from "./auth-service";
 
 const apiUrl = "voting_sessions";
 
+const getApiUrl = () => {
+  if (!findCredentials()) {
+    throw new Error('No credentials found');
+  }
+  const userTypePrefix = findCredentials().credentials?.userType.toLowerCase();
+  return `${userTypePrefix}/${apiUrl}`;
+};
+
 export const getVotingSessions = async (): Promise<VotingSession[]> => {
   const response = await axiosInstance.get<VotingSession[]>(
-    apiUrl,
+    getApiUrl(),
     getHeadersConfig()
   );
   return response.data;
 };
 
-export interface NewVotingSession extends Omit<VotingSession, "id"> {
-}
+export interface NewVotingSession extends Omit<VotingSession, "id"> {}
 
 export const postVotingSession = async (
   newVotingSession: NewVotingSession
 ): Promise<VotingSession> => {
   const response = await axiosInstance.post<VotingSession>(
-    apiUrl,
+    getApiUrl(),
     newVotingSession,
     getHeadersConfig()
   );
@@ -30,7 +38,7 @@ export const putVotingSession = async (
   editedSession: VotingSession
 ): Promise<VotingSession> => {
   const response = await axiosInstance.put<VotingSession>(
-    apiUrl,
+    getApiUrl(),
     editedSession,
     getHeadersConfig()
   );
@@ -41,7 +49,7 @@ export const deleteVotingSession = async (
   deletedSession: VotingSession
 ): Promise<void> => {
   return await axiosInstance.delete(
-    `${apiUrl}/${deletedSession.id}`,
+    `${getApiUrl()}/${deletedSession.id}`,
     getHeadersConfig()
   );
 };
@@ -50,11 +58,11 @@ export const getVotingSessionVotingList = async (
   votingSession: VotingSession | undefined
 ): Promise<Voting[]> => {
   if (!votingSession) {
-    return []
+    return [];
   }
   const response = await axiosInstance.get(
-    `${apiUrl}/${votingSession.id}/voting_list`,
+    `${getApiUrl()}/${votingSession.id}/voting_list`,
     getHeadersConfig()
-  )
-  return response.data
-}
+  );
+  return response.data;
+};

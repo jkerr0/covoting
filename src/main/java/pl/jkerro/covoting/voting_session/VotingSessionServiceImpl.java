@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -38,7 +39,12 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Override
     public List<VotingSession> findAllVotingSessions() {
-        return votingSessionRepository.findAll();
+        return votingSessionRepository.findAllByOrderByStartDate();
+    }
+
+    @Override
+    public List<VotingSession> findPublishedVotingSessions() {
+        return List.of();
     }
 
     @Override
@@ -51,5 +57,10 @@ public class VotingSessionServiceImpl implements VotingSessionService {
         return votingSessionRepository.findById(votingSessionId)
                 .map(VotingSession::getVotingList)
                 .orElse(List.of());
+    }
+
+    @Override
+    public Optional<VotingSession> findVotingSessionById(Integer id) {
+        return votingSessionRepository.findById(id);
     }
 }

@@ -7,7 +7,8 @@ export interface WithSeq {
 }
 export interface VotingSession extends WithId {
     name: string,
-    startDate: string
+    startDate: string,
+    isPublished: boolean,
     votingList: Voting[]
 }
 

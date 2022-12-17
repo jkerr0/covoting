@@ -42,12 +42,13 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
   );
   const defaultErrorHandler = useErrorHandler();
 
+  const [isPublished,] = useState(false)
+
   const afterMutationSuccess = () => {
     queryClient.invalidateQueries([
       Queries.VOTING_SESSIONS,
       getVotingListQueryName(),
-    ]);
-    afterSave();
+    ]).then(() => afterSave());
   };
 
   const queryClient = useQueryClient();
@@ -83,6 +84,7 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
     }
     const editedSession: VotingSession = {
       id: votingSession.id,
+      isPublished,
       name,
       startDate: moment(date).toISOString(),
       votingList,
@@ -96,6 +98,7 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
     }
     const newSession: NewVotingSession = {
       name,
+      isPublished,
       startDate: moment(date).toISOString(),
       votingList,
     };

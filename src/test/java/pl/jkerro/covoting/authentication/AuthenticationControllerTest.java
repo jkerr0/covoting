@@ -4,60 +4,95 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import pl.jkerro.covoting.users.User;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.context.WebApplicationContext;
+import pl.jkerro.covoting.users.ApplicationUser;
 import pl.jkerro.covoting.users.UserRepository;
+import pl.jkerro.covoting.users.UserType;
+import pl.jkerro.covoting.voting_session.VotingSessionRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@MockBean(classes = {UserRepository.class})
-@AutoConfigureMockMvc
+@SpringBootTest
 class AuthenticationControllerTest {
 
     private static final String TEST_USER_EMAIL = "abcd@abcd.pl";
     private static final String TEST_USER_PASS = "ababa123";
 
-    @Autowired
+    @Spy
+    private JwtTokenService jwtTokenService;
+
     private AuthenticationController authenticationController;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @Autowired
+    @MockBean
+    private AuthenticationManager authenticationManager;
+
+    @MockBean
     private UserRepository userRepository;
 
+    @MockBean
+    private VotingSessionRepository votingSessionRepository;
+
     @Autowired
-    private MockMvc mockMvc;
+    private WebApplicationContext context;
 
     @BeforeEach
     void setup() {
-        Mockito.when(userRepository.findUserByEmail(TEST_USER_EMAIL))
-                .thenReturn(Optional.of(new User(TEST_USER_EMAIL, passwordEncoder.encode(TEST_USER_PASS))));
+        ReflectionTestUtils.setField(jwtTokenService, "secret", "testSecret");
+        ReflectionTestUtils.setField(jwtTokenService, "tokenExpirationMs", "100000");
+
+        authenticationController = new AuthenticationController(authenticationManager, jwtTokenService);
+
+        ApplicationUser testApplicationUser = ApplicationUser.builder()
+                .email(TEST_USER_EMAIL)
+                .passwordHash(passwordEncoder.encode(TEST_USER_PASS))
+                .userType(UserType.ADMIN)
+                .build();
+        Mockito.when(userRepository.findApplicationUserByEmail(TEST_USER_EMAIL))
+                .thenReturn(Optional.of(testApplicationUser));
+
+        Mockito.when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(TEST_USER_EMAIL, TEST_USER_PASS)))
+                .thenReturn(new TestingAuthenticationToken(testApplicationUser.toUserDetails(), TEST_USER_PASS));
+
+        Mockito.when(votingSessionRepository.findAll()).thenReturn(List.of());
     }
 
     ResponseEntity<JwtTokenResponse> getValidUserAuthenticationResponse() {
-        LoginRequest request = new LoginRequest(TEST_USER_EMAIL, TEST_USER_PASS);
+        LoginRequest request = getLoginRequest();
         return authenticationController.authenticate(request);
+    }
+
+    private LoginRequest getLoginRequest() {
+        return new LoginRequest(TEST_USER_EMAIL, TEST_USER_PASS);
     }
 
     @Test
     void shouldReturnOkWhenValidUser() {
         assertEquals(HttpStatus.OK, getValidUserAuthenticationResponse().getStatusCode());
+    }
+
+    @Test
+    void shouldThrowWhenInvalidUser() {
+        LoginRequest loginRequest = new LoginRequest("aaa", "bbb");
+        assertThrows(Exception.class, () -> authenticationController.authenticate(loginRequest));
     }
 
     @Test
@@ -79,19 +114,11 @@ class AuthenticationControllerTest {
     }
 
     @Test
-    void shouldGetOkFromSecureEndpointAfterAuthentication() throws Exception {
-        JwtTokenResponse response = Optional.ofNullable(getValidUserAuthenticationResponse().getBody())
-                .orElseThrow();
+    void shouldReturnUserType() {
+        UserType userType = Optional.ofNullable(getValidUserAuthenticationResponse().getBody())
+                .map(JwtTokenResponse::userType)
+                .orElse(null);
 
-        RequestBuilder secureRequest = MockMvcRequestBuilders.get("/voting_sessions")
-                .header("Authorization", String.format("%s %s", response.tokenType(), response.jwtToken()));
-
-        mockMvc.perform(secureRequest).andExpect(status().isOk());
-    }
-
-    @Test
-    void shouldGetUnauthorizedWithoutCredentials() throws Exception {
-        RequestBuilder secureRequest = MockMvcRequestBuilders.get("/voting_sessions");
-        mockMvc.perform(secureRequest).andExpect(status().isUnauthorized());
+        assertNotNull(userType);
     }
 }

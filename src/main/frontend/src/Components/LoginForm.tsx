@@ -7,11 +7,12 @@ import {
   Typography,
 } from "@mui/material";
 import { AxiosError } from "axios";
-import { FC, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { storeCredentials, Credentials } from "Services/auth-service";
-import { useMutation } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { postLogin } from "Services/auth-api-service";
+import { AuthContext } from "Utils/AuthContext";
 
 export const LoginForm: FC = () => {
   const [invalidCredentials, isInvalidCredentials] = useState<boolean>(false);
@@ -23,15 +24,20 @@ export const LoginForm: FC = () => {
   const { state } = useLocation();
   const tokenExpired: boolean = state ? state.tokenExpired : false;
 
+  const authContext = useContext(AuthContext);
+
   const handleLoginError = (error: AxiosError) => {
     if (error.response?.status === 401) {
       isInvalidCredentials(true);
     }
   };
 
+  const queryClient = useQueryClient();
   const loginMutation = useMutation(postLogin, {
     onSuccess: (credentials: Credentials) => {
+      queryClient.invalidateQueries();
       storeCredentials(credentials);
+      authContext.setCredentials(credentials);
       navigate("/");
     },
     onError: handleLoginError,

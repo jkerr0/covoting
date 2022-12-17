@@ -1,11 +1,15 @@
 import { AxiosError } from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
 import { useNavigate } from "react-router-dom";
 import { deleteCredentials } from "Services/auth-service";
+import { AuthContext } from "Utils/AuthContext";
 
 const useErrorHandler = (errorParam?: AxiosError | null) => {
   const [error, setError] = useState<AxiosError | undefined>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient()
+  const authContext = useContext(AuthContext)
   useEffect(() => {
     errorParam && setError(errorParam);
   }, [errorParam]);
@@ -15,6 +19,8 @@ const useErrorHandler = (errorParam?: AxiosError | null) => {
       return;
     } else if (error.response && error.response.status === 401) {
       deleteCredentials();
+      authContext.setCredentials(null)
+      queryClient.invalidateQueries();
       navigate("/login", { state: { tokenExpired: true } });
     } else {
       console.error(error);

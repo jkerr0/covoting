@@ -24,6 +24,7 @@ import {
 } from "Services/voting-session-api-service";
 import Queries from "Utils/queries";
 import { AxiosError } from "axios";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const modalStyle: React.CSSProperties = {
   display: "block",
@@ -62,6 +63,7 @@ export const VotingSessionList: FC = () => {
   const queryClient = useQueryClient();
 
   const {
+    isLoading,
     data: votingSessions,
     error,
   } = useQuery<VotingSession[], AxiosError>(
@@ -127,13 +129,14 @@ export const VotingSessionList: FC = () => {
           Add new session
         </Button>
       </Box>
+      {isLoading && <CircularProgress />}
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Starts at</TableCell>
-              <TableCell/>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>

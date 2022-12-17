@@ -1,7 +1,10 @@
 package pl.jkerro.covoting.users;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.Optional;
 
-public interface UserRepository {
-    Optional<User> findUserByEmail(String email);
+public interface UserRepository extends JpaRepository<ApplicationUser, Integer> {
+
+    Optional<ApplicationUser> findApplicationUserByEmail(String email);
 }

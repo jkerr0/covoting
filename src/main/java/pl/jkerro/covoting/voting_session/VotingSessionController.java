@@ -1,40 +1,22 @@
 package pl.jkerro.covoting.voting_session;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@RequestMapping("voting_sessions")
-@RestController
-public class VotingSessionController {
-
-    private final VotingSessionService votingSessionService;
-
-    @GetMapping
-    public List<VotingSession> getSessionsList() {
-        return votingSessionService.findAllVotingSessions();
-    }
-
-    @GetMapping("{id}/voting_list")
-    public List<Voting> getSessionVotingList(@PathVariable Integer id) {
-        return votingSessionService.findVotingListBySession(id);
-    }
-
-    @PostMapping
-    public VotingSession createSession(@RequestBody VotingSession votingSession) {
-        votingSessionService.createVotingSession(votingSession);
-        return votingSession;
-    }
-
+public interface VotingSessionController {
     @PutMapping
-    public void updateSession(@RequestBody VotingSession votingSession) {
-        votingSessionService.updateVotingSession(votingSession);
-    }
+    void updateSession(@RequestBody VotingSession votingSession);
 
     @DeleteMapping("{id}")
-    public void deleteSessionById(@PathVariable Integer id) {
-        votingSessionService.deleteSessionById(id);
-    }
+    void deleteSessionById(@PathVariable Integer id);
+
+    @GetMapping
+    List<VotingSession> getSessionsList();
+
+    @GetMapping("{id}/voting_list")
+    List<Voting> getSessionVotingList(@PathVariable Integer id);
+
+    @PostMapping
+    VotingSession createSession(@RequestBody VotingSession votingSession);
 }
