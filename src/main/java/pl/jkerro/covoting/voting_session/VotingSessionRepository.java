@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface VotingSessionRepository extends JpaRepository<VotingSession, Integer> {
     List<VotingSession> findAllByOrderByStartDate();
+
+    List<VotingSession> findAllByIsPublishedOrderByStartDate(boolean isPublished);
 }

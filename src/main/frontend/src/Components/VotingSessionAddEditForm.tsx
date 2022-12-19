@@ -1,4 +1,13 @@
-import { Box, Button, Stack, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  FormGroup,
+  Stack,
+  Switch,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { FC, useState } from "react";
 import { MajorityType, Voting, VotingSession } from "Utils/data";
 import moment from "moment";
@@ -29,8 +38,15 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
   votingSession,
   afterSave,
 }) => {
-  const [votingList, setVotingList, addVoting, updateVoting, deleteVoting, votingDown, votingUp] =
-    useEntityWithSeqList<Voting>();
+  const [
+    votingList,
+    setVotingList,
+    addVoting,
+    updateVoting,
+    deleteVoting,
+    votingDown,
+    votingUp,
+  ] = useEntityWithSeqList<Voting>();
 
   const [name, setName] = useState<string | undefined>(
     isAdd ? undefined : votingSession?.name
@@ -42,13 +58,12 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
   );
   const defaultErrorHandler = useErrorHandler();
 
-  const [isPublished,] = useState(false)
+  const [isPublished, setIsPublished] = useState(isAdd || votingSession === undefined ? false : votingSession.isPublished);
 
   const afterMutationSuccess = () => {
-    queryClient.invalidateQueries([
-      Queries.VOTING_SESSIONS,
-      getVotingListQueryName(),
-    ]).then(() => afterSave());
+    queryClient
+      .invalidateQueries([Queries.VOTING_SESSIONS, getVotingListQueryName()])
+      .then(() => afterSave());
   };
 
   const queryClient = useQueryClient();
@@ -138,6 +153,18 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
             shrink: true,
           }}
         />
+        <FormGroup row>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isPublished}
+                onChange={(e) => setIsPublished(e.target.checked)}
+              />
+            }
+            label="Publish voting session"
+            labelPlacement="start"
+          />
+        </FormGroup>
         {votingList.map((voting, index) => (
           <VotingCard
             key={`voting-${index}`}

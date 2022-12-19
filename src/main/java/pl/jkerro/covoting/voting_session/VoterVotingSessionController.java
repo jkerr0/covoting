@@ -8,20 +8,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("voter/voting_sessions")
 @RestController
-public class VoterVotingSessionController implements VotingSessionController {
+public class VoterVotingSessionController {
 
     private final VotingSessionService votingSessionService;
-
-
-    @Override
-    public void updateSession(VotingSession votingSession) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteSessionById(Integer id) {
-        throw new UnsupportedOperationException();
-    }
 
     @GetMapping
     public List<VotingSession> getSessionsList() {
@@ -34,10 +23,5 @@ public class VoterVotingSessionController implements VotingSessionController {
                 .filter(VotingSession::getIsPublished)
                 .map(VotingSession::getVotingList)
                 .orElse(List.of());
-    }
-
-    @Override
-    public VotingSession createSession(VotingSession votingSession) {
-        throw new UnsupportedOperationException();
     }
 }

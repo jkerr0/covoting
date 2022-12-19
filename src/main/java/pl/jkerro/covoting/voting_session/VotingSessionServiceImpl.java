@@ -44,7 +44,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Override
     public List<VotingSession> findPublishedVotingSessions() {
-        return List.of();
+        return votingSessionRepository.findAllByIsPublishedOrderByStartDate(true);
     }
 
     @Override
