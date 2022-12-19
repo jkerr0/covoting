@@ -2,8 +2,9 @@ package pl.jkerro.covoting.authentication;
 
 import lombok.Builder;
 import org.codehaus.plexus.util.StringUtils;
+import pl.jkerro.covoting.users.UserType;
 
-public record JwtTokenResponse(String jwtToken, String tokenType) {
+public record JwtTokenResponse(String jwtToken, String tokenType, UserType userType) {
     @Builder public JwtTokenResponse {}
 
     public static final class JwtTokenResponseBuilder {

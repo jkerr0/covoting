@@ -12,7 +12,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import React, { FC, useState } from "react";
+import React, { FC, useContext, useState } from "react";
 import { VotingSession } from "Utils/data";
 import VotingSessionAddEditForm from "./VotingSessionAddEditForm";
 import moment from "moment";
@@ -24,6 +24,9 @@ import {
 } from "Services/voting-session-api-service";
 import Queries from "Utils/queries";
 import { AxiosError } from "axios";
+import CircularProgress from "@mui/material/CircularProgress";
+import { AuthContext } from "Utils/AuthContext";
+import { UserType } from "Services/auth-service";
 
 const modalStyle: React.CSSProperties = {
   display: "block",
@@ -46,6 +49,12 @@ export const VotingSessionList: FC = () => {
   const [selected, setSelected] = useState<VotingSession | undefined>();
   const defaultErrorHandler = useErrorHandler();
 
+  const { credentials } = useContext(AuthContext);
+  if (!credentials) {
+    throw new Error("No credentials");
+  }
+  const { userType } = credentials;
+
   const handleOpenAddEditModal = (add: boolean) => {
     setModalOpen(true);
     setIsAdd(add);
@@ -62,6 +71,7 @@ export const VotingSessionList: FC = () => {
   const queryClient = useQueryClient();
 
   const {
+    isLoading,
     data: votingSessions,
     error,
   } = useQuery<VotingSession[], AxiosError>(
@@ -90,13 +100,23 @@ export const VotingSessionList: FC = () => {
         <TableCell>
           {moment(votingSession.startDate).format(DATE_FORMAT)}
         </TableCell>
-        <TableCell>
-          <ButtonGroup>
-            <Button onClick={() => handleEdit(votingSession)}>Edit</Button>
-            <Button onClick={() => deleteMutation.mutate(votingSession)}>
-              Delete
-            </Button>
-          </ButtonGroup>
+        <TableCell align="center">
+          {userType === UserType.ADMIN && (
+            <ButtonGroup>
+              <Button onClick={() => handleEdit(votingSession)}>Edit</Button>
+              <Button onClick={() => deleteMutation.mutate(votingSession)}>
+                Delete
+              </Button>
+              <Button>Go to control panel</Button>
+            </ButtonGroup>
+          )}
+          {
+            userType === UserType.VOTER &&
+            <ButtonGroup>
+              <Button>Confirm presence</Button>
+              <Button>Go to voting</Button>
+            </ButtonGroup>
+          }
         </TableCell>
       </TableRow>
     );
@@ -119,21 +139,24 @@ export const VotingSessionList: FC = () => {
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "end" }}>
-        <Button
-          variant="contained"
-          style={{ margin: "20px" }}
-          onClick={() => handleOpenAddEditModal(true)}
-        >
-          Add new session
-        </Button>
+        {userType === UserType.ADMIN && (
+          <Button
+            variant="contained"
+            style={{ margin: "20px" }}
+            onClick={() => handleOpenAddEditModal(true)}
+          >
+            Add new session
+          </Button>
+        )}
       </Box>
+      {isLoading && <CircularProgress />}
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Starts at</TableCell>
-              <TableCell/>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>

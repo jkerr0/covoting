@@ -1,6 +1,7 @@
 package pl.jkerro.covoting.voting_session;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VotingSessionService {
 
@@ -10,7 +11,11 @@ public interface VotingSessionService {
 
     List<VotingSession> findAllVotingSessions();
 
+    List<VotingSession> findPublishedVotingSessions();
+
     void deleteSessionById(Integer id);
 
     List<Voting> findVotingListBySession(Integer votingSessionId);
+
+    Optional<VotingSession> findVotingSessionById(Integer id);
 }

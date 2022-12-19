@@ -31,4 +31,5 @@ public class VotingSession {
     @JsonDeserialize
     private List<Voting> votingList = new ArrayList<>();
 
+    private Boolean isPublished;
 }

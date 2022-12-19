@@ -1,45 +1,45 @@
+export enum UserType {
+  ADMIN = "ADMIN",
+  VOTER = "VOTER",
+}
 export interface Credentials {
-    jwtToken: string,
-    tokenType: string
+  jwtToken: string;
+  tokenType: string;
+  userType: UserType;
 }
 
 export interface OptionalCredentials {
-    credentials?: Credentials
+  credentials?: Credentials;
 }
 
+const credentialsKey = "credentials"
 
 export const storeCredentials = (creds: Credentials): void => {
-    localStorage.setItem('jwtToken', creds.jwtToken)
-    localStorage.setItem('tokenType', creds.tokenType)
-}
+  localStorage.setItem(credentialsKey, JSON.stringify(creds));
+};
 
 export const deleteCredentials = () => {
-    localStorage.removeItem('jwtToken')
-    localStorage.removeItem('tokenType')
-}
+  localStorage.removeItem(credentialsKey);
+};
 
 export const findCredentials = (): OptionalCredentials => {
-    const jwtToken = localStorage.getItem('jwtToken')
-    const tokenType = localStorage.getItem('tokenType')
-    if (jwtToken && tokenType) {
-        const credentials: Credentials =  {
-            jwtToken,
-            tokenType
-        }
-        return {credentials}
-    }
-    return {}
-}
+  const storedCredentials = localStorage.getItem(credentialsKey);
+  if (!storedCredentials) {
+    return {};
+  }
+  const credentials: Credentials = JSON.parse(storedCredentials);
+  return { credentials };
+};
 
 export const hasCredentials = (): boolean => {
-    return findCredentials().credentials ? true : false
-}
+  return !!findCredentials().credentials;
+};
 
 export const getAuthorizationHeader = (): string => {
-    const creds = findCredentials()?.credentials
-    if (creds) {
-        return `${creds.tokenType} ${creds.jwtToken}`
-    } else {
-        return ''
-    }
-}
+  const creds = findCredentials()?.credentials;
+  if (creds) {
+    return `${creds.tokenType} ${creds.jwtToken}`;
+  } else {
+    return "";
+  }
+};

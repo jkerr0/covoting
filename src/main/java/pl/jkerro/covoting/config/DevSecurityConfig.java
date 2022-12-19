@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import pl.jkerro.covoting.authentication.JwtAuthenticationEntryPoint;
 import pl.jkerro.covoting.authentication.JwtRequestFilter;
+import pl.jkerro.covoting.users.UserType;
 
 import java.util.List;
 
@@ -46,10 +47,10 @@ public class DevSecurityConfig {
                 .configurationSource(getCorsConfigurationSource())
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/**")
-                .anonymous()
-                .anyRequest()
-                .authenticated()
+                .antMatchers("/auth/**").anonymous()
+                .antMatchers("/admin/**").hasRole(UserType.ADMIN.toString())
+                .antMatchers("/voter/**").hasRole(UserType.VOTER.toString())
+                .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()

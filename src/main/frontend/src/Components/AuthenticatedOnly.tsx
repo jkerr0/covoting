@@ -1,25 +1,39 @@
-import { FC, ReactElement, useEffect } from "react";
-import { findCredentials } from "Services/auth-service";
+import { FC, ReactElement, useEffect, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "Utils/AuthContext";
+import CenteredContainer from "./CenteredContainer";
+import { CircularProgress } from "@mui/material";
 
 interface AuthenticatedOnlyProps {
   children: ReactElement;
 }
 
 const AuthenticatedOnly: FC<AuthenticatedOnlyProps> = ({ children }) => {
-  useCredentialsOrRedirectToLogin();
-  return children;
+  const shouldRender = useCredentialsOrRedirectToLogin();
+  return shouldRender ? (
+    children
+  ) : (
+    <CenteredContainer>
+      <CircularProgress />
+    </CenteredContainer>
+  );
 };
 
 const useCredentialsOrRedirectToLogin = () => {
   const navigate = useNavigate();
-  const isNotAuthenticated = (): boolean => !findCredentials().credentials;
+  const authContext = useContext(AuthContext);
+
+  const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
-    if (isNotAuthenticated()) {
+    if (!authContext.credentials) {
       navigate("/login");
+    } else {
+      setShouldRender(true);
     }
-  }, [navigate]);
-}
+  }, [authContext.credentials]);
+
+  return shouldRender;
+};
 
 export default AuthenticatedOnly;
