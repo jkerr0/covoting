@@ -18,4 +18,6 @@ public interface VotingSessionService {
     List<Voting> findVotingListBySession(Integer votingSessionId);
 
     Optional<VotingSession> findVotingSessionById(Integer id);
+
+    CurrentVotingInfo findVotingSessionCurrentVotingInfoById(Integer id);
 }

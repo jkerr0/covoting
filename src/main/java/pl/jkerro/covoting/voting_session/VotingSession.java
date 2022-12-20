@@ -1,6 +1,5 @@
 package pl.jkerro.covoting.voting_session;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +10,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,4 +32,12 @@ public class VotingSession {
     private List<Voting> votingList = new ArrayList<>();
 
     private Boolean isPublished;
+    private Integer currentVotingSeq;
+
+    public Optional<Voting> getCurrentVoting() {
+        if (currentVotingSeq.equals(0)) {
+            return Optional.empty();
+        }
+        return Optional.of(votingList.get(currentVotingSeq - 1));
+    }
 }

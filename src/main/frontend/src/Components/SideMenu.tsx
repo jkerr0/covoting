@@ -7,7 +7,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { FC } from "react";
+import { FC, ReactElement } from "react";
 import HomeIcon from "@mui/icons-material/Home";
 
 interface MenuProps {
@@ -15,19 +15,29 @@ interface MenuProps {
   setOpen: (isOpen: boolean) => void;
 }
 
+interface MenuElementProps {
+  href: string,
+  icon: ReactElement,
+  label: string
+}
+
+const MenuElement: FC<MenuElementProps> = ({href, icon, label}) => (
+  <ListItem>
+    <ListItemButton href={href}>
+      <ListItemIcon>
+        {icon}
+      </ListItemIcon>
+      <ListItemText>{label}</ListItemText>
+    </ListItemButton>
+  </ListItem>
+);
+
 const SideMenu: FC<MenuProps> = ({ open, setOpen }) => {
   return (
     <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
       <Box onClick={() => setOpen(false)}>
         <List>
-          <ListItem>
-            <ListItemButton href="/">
-              <ListItemIcon>
-                <HomeIcon />
-              </ListItemIcon>
-              <ListItemText>Voting sessions</ListItemText>
-            </ListItemButton>
-          </ListItem>
+          <MenuElement href="/" icon={<HomeIcon />} label="Voting sessions"/>
         </List>
       </Box>
     </Drawer>

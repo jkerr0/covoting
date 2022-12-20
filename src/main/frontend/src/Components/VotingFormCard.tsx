@@ -29,7 +29,7 @@ interface VotingCardProps {
   onVotingDown: (voting: Voting) => void;
 }
 
-const VotingCard: FC<VotingCardProps> = ({
+const VotingFormCard: FC<VotingCardProps> = ({
   voting: votingInit,
   onVotingChanged,
   onVotingDelete,
@@ -131,4 +131,4 @@ const VotingCard: FC<VotingCardProps> = ({
   );
 };
 
-export default VotingCard;
+export default VotingFormCard;

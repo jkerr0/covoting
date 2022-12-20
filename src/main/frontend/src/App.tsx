@@ -8,23 +8,33 @@ import ErrorPage from "./Pages/ErrorPage";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Credentials, findCredentials } from "Services/auth-service";
 import { AuthContext } from "Utils/AuthContext";
+import VotingControlPage from "Pages/VotingControlPage";
 
 const queryClient = new QueryClient();
 
 function App() {
-
-  const [credentials, setCredentials] = useState<Credentials | null>(findCredentials().credentials || null)
+  const [credentials, setCredentials] = useState<Credentials | null>(
+    findCredentials().credentials || null
+  );
 
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <AuthContext.Provider value={{credentials, setCredentials}}>
+        <AuthContext.Provider value={{ credentials, setCredentials }}>
           <Routes>
             <Route
               path="/"
               element={
                 <AuthenticatedOnly>
                   <VotingSessionsPage />
+                </AuthenticatedOnly>
+              }
+            />
+            <Route
+              path="voting/:id"
+              element={
+                <AuthenticatedOnly>
+                  <VotingControlPage invalidParamUrl={"/voting"} />
                 </AuthenticatedOnly>
               }
             />

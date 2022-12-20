@@ -39,12 +39,12 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Override
     public List<VotingSession> findAllVotingSessions() {
-        return votingSessionRepository.findAllByOrderByStartDate();
+        return votingSessionRepository.findAllByOrderByStartDateDesc();
     }
 
     @Override
     public List<VotingSession> findPublishedVotingSessions() {
-        return votingSessionRepository.findAllByIsPublishedOrderByStartDate(true);
+        return votingSessionRepository.findAllByIsPublishedOrderByStartDateDesc(true);
     }
 
     @Override
@@ -62,5 +62,16 @@ public class VotingSessionServiceImpl implements VotingSessionService {
     @Override
     public Optional<VotingSession> findVotingSessionById(Integer id) {
         return votingSessionRepository.findById(id);
+    }
+
+    @Override
+    public CurrentVotingInfo findVotingSessionCurrentVotingInfoById(Integer id) {
+        VotingSession session = votingSessionRepository.findById(id)
+                .orElseThrow();
+
+        return CurrentVotingInfo.builder()
+                .voting(session.getCurrentVoting().orElse(null))
+                .votingCount(session.getVotingList().size())
+                .build();
     }
 }

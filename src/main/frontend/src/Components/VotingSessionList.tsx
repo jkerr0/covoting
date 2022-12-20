@@ -107,16 +107,17 @@ export const VotingSessionList: FC = () => {
               <Button onClick={() => deleteMutation.mutate(votingSession)}>
                 Delete
               </Button>
-              <Button>Go to control panel</Button>
+              <Button href={`/voting/${votingSession.id}`}>
+                Go to control panel
+              </Button>
             </ButtonGroup>
           )}
-          {
-            userType === UserType.VOTER &&
+          {userType === UserType.VOTER && (
             <ButtonGroup>
               <Button>Confirm presence</Button>
               <Button>Go to voting</Button>
             </ButtonGroup>
-          }
+          )}
         </TableCell>
       </TableRow>
     );

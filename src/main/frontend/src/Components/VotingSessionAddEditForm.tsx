@@ -14,7 +14,7 @@ import moment from "moment";
 import useErrorHandler from "Hooks/useErrorHandler";
 import AddIcon from "@mui/icons-material/Add";
 import useEntityWithSeqList from "Hooks/useEntityWithSeqList";
-import VotingCard from "Components/VotingCard";
+import VotingFormCard from "Components/VotingFormCard";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   getVotingSessionVotingList,
@@ -58,7 +58,9 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
   );
   const defaultErrorHandler = useErrorHandler();
 
-  const [isPublished, setIsPublished] = useState(isAdd || votingSession === undefined ? false : votingSession.isPublished);
+  const [isPublished, setIsPublished] = useState(
+    isAdd || votingSession === undefined ? false : votingSession.isPublished
+  );
 
   const afterMutationSuccess = () => {
     queryClient
@@ -166,7 +168,7 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
           />
         </FormGroup>
         {votingList.map((voting, index) => (
-          <VotingCard
+          <VotingFormCard
             key={`voting-${index}`}
             voting={voting}
             onVotingChanged={updateVoting}
@@ -175,8 +177,7 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
             onVotingUp={votingUp}
           />
         ))}
-        <Button onClick={handleVotingAdd}>
-          <AddIcon />
+        <Button onClick={handleVotingAdd} startIcon={<AddIcon />}>
           Add voting
         </Button>
         <Button onClick={handleSave} variant="contained">
