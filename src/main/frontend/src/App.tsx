@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { Credentials, findCredentials } from "Services/auth-service";
 import { AuthContext } from "Utils/AuthContext";
 import VotingControlPage from "Pages/VotingControlPage";
+import VotingPage from "Pages/VotingPage";
 
 const queryClient = new QueryClient();
 
@@ -31,10 +32,18 @@ function App() {
               }
             />
             <Route
+              path="voting-control/:id"
+              element={
+                <AuthenticatedOnly>
+                  <VotingControlPage invalidParamUrl={"/voting-control"} />
+                </AuthenticatedOnly>
+              }
+            />
+            <Route
               path="voting/:id"
               element={
                 <AuthenticatedOnly>
-                  <VotingControlPage invalidParamUrl={"/voting"} />
+                  <VotingPage />
                 </AuthenticatedOnly>
               }
             />

@@ -4,6 +4,7 @@ import {
   CardContent,
   CardHeader,
   Table,
+  TableBody,
   TableCell,
   TableCellProps,
   TableRow,
@@ -28,21 +29,23 @@ interface InfoProps extends Voting {
 
 const InfoTable: FC<InfoProps> = ({ name, majorityType, withControl }) => (
   <Table size="small">
-    <TableRow>
-      <TableCellNoBorder>Name:</TableCellNoBorder>
-      <TableCellNoBorder>{name}</TableCellNoBorder>
-    </TableRow>
-    <TableRow>
-      <TableCellNoBorder>Majority type:</TableCellNoBorder>
-      <TableCellNoBorder>{majorityType}</TableCellNoBorder>
-    </TableRow>
-    {withControl && (
+    <TableBody>
       <TableRow>
-        <TableCellNoBorder>
-          <Button endIcon={<ForwardIcon />}>Next voting</Button>
-        </TableCellNoBorder>
+        <TableCellNoBorder>Name:</TableCellNoBorder>
+        <TableCellNoBorder>{name}</TableCellNoBorder>
       </TableRow>
-    )}
+      <TableRow>
+        <TableCellNoBorder>Majority type:</TableCellNoBorder>
+        <TableCellNoBorder>{majorityType}</TableCellNoBorder>
+      </TableRow>
+      {withControl && (
+        <TableRow>
+          <TableCellNoBorder>
+            <Button endIcon={<ForwardIcon />}>Next voting</Button>
+          </TableCellNoBorder>
+        </TableRow>
+      )}
+    </TableBody>
   </Table>
 );
 
@@ -54,7 +57,7 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
   const { seq } = voting;
 
   return (
-    <Card>
+    <Card style={{ height: "100%" }}>
       <CardHeader title={`Current voting (${seq}/${votingCount})`} />
       <CardContent>
         <InfoTable {...voting} withControl={withControl} />

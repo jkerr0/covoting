@@ -27,19 +27,7 @@ import { AxiosError } from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AuthContext } from "Utils/AuthContext";
 import { UserType } from "Services/auth-service";
-
-const modalStyle: React.CSSProperties = {
-  display: "block",
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  minWidth: "35vw",
-  backgroundColor: "white",
-  border: "none",
-  maxHeight: "80vh",
-  overflow: "auto",
-};
+import { modalStyle } from "Utils/modal-style";
 
 const DATE_FORMAT: string = "DD.MM.yyyy hh:mm";
 
@@ -107,15 +95,15 @@ export const VotingSessionList: FC = () => {
               <Button onClick={() => deleteMutation.mutate(votingSession)}>
                 Delete
               </Button>
-              <Button href={`/voting/${votingSession.id}`}>
+              <Button href={`/voting-control/${votingSession.id}`}>
                 Go to control panel
               </Button>
             </ButtonGroup>
           )}
           {userType === UserType.VOTER && (
             <ButtonGroup>
-              <Button>Confirm presence</Button>
-              <Button>Go to voting</Button>
+              <Button disabled>Confirm presence</Button>
+              <Button href={`voting/${votingSession.id}`}>Go to voting</Button>
             </ButtonGroup>
           )}
         </TableCell>

@@ -12,16 +12,32 @@ services:
     ports:
       - "5432:5433"
     volumes:
-      - ./db-data:/var/lib/postgresql/data
+      - ./postgres/db-data:/var/lib/postgresql/data
+  rabbitmq:
+    image: rabbitmq:3.11-alpine
+    container_name: "covoting-rabbitmq"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "61613:61613"
+    volumes:
+      - ./rabbitmq:/etc/rabbitmq
   spring:
     image: jkerr0/covoting-spring
     build: .
+    container_name: "covoting-spring"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     ports:
       - "8080:8080"
     depends_on:
       - postgres
+      - rabbitmq
+    profiles:
+      - prod
   frontend:
     image: jkerr0/covoting-frontend
     build: src/main/frontend
@@ -30,3 +46,5 @@ services:
       - "80:80"
     depends_on:
       - spring
+    profiles:
+      - prod
