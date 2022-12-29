@@ -10,7 +10,10 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import Typography from "@mui/material/Typography";
 import { FC, MouseEventHandler, useState } from "react";
+import { useStompClient } from "react-stomp-hooks";
+import { getAuthorizationHeader } from "Services/auth-service";
 
 interface VoteButtonProps {
   children?: string;
@@ -39,11 +42,28 @@ const VoteButton: FC<VoteButtonProps> = ({ color, children, onClick }) => (
 
 type VoteType = "for" | "against" | "abstain";
 
-const VoteCastCard = () => {
+interface VoteCastCardProps {
+  sessionId: number;
+  votingEnabled: boolean;
+  onVote: () => void;
+}
+
+const VoteCastCard: FC<VoteCastCardProps> = ({
+  sessionId,
+  votingEnabled,
+  onVote,
+}) => {
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [voteType, setVoteType] = useState<VoteType | undefined>();
 
+  const voteHandler = useVoteCastHandler(sessionId);
+
   const handleVoteConfirmed = () => {
+    if (!voteType) {
+      throw new Error("No vote type selected");
+    }
+    voteHandler(voteType);
+    onVote();
     setVoteType(undefined);
     setConfirmOpen(false);
   };
@@ -73,22 +93,37 @@ const VoteCastCard = () => {
       <Card style={{ height: "100%" }}>
         <CardHeader title={"Cast a vote"} />
         <CardContent>
-          <Box sx={{ display: "flex" }} justifyContent="space-around" gap={2}>
-            <VoteButton color="success" onClick={() => handleVote("for")}>
-              Vote for
-            </VoteButton>
-            <VoteButton color="error" onClick={() => handleVote("against")}>
-              Vote against
-            </VoteButton>
-            <VoteButton onClick={() => handleVote("abstain")}>
-              Abstain
-            </VoteButton>
-          </Box>
+          {votingEnabled ? (
+            <Box sx={{ display: "flex" }} justifyContent="space-around" gap={2}>
+              <VoteButton color="success" onClick={() => handleVote("for")}>
+                Vote for
+              </VoteButton>
+              <VoteButton color="error" onClick={() => handleVote("against")}>
+                Vote against
+              </VoteButton>
+              <VoteButton onClick={() => handleVote("abstain")}>
+                Abstain
+              </VoteButton>
+            </Box>
+          ) : (
+            <Typography>Please wait for the next voting</Typography>
+          )}
         </CardContent>
       </Card>
       <ConfirmDialog />
     </>
   );
+};
+
+const useVoteCastHandler = (sessionId: number) => {
+  const stompClient = useStompClient();
+
+  return (voteType: VoteType) =>
+    stompClient?.publish({
+      destination: `/app/session/${sessionId}/vote`,
+      body: voteType.toUpperCase(),
+      headers: { Authorization: getAuthorizationHeader() },
+    });
 };
 
 export default VoteCastCard;

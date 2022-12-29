@@ -6,11 +6,16 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import { FC, useState } from "react";
+import { useStompClient } from "react-stomp-hooks";
 
-const VotingProgressCard = () => {
-  const [votesCast] = useState<number>(0);
+interface VotingProgressCardProps {
+  sessionId: number
+}
+
+const VotingProgressCard: FC<VotingProgressCardProps> = ({sessionId}) => {
   const maxVotes = 10;
+  const voteProgress = useVoteProgress(sessionId);
 
   return (
     <Card>
@@ -20,13 +25,24 @@ const VotingProgressCard = () => {
           <Stack>
             <Typography variant="h6">Votes cast</Typography>
             <Typography variant="h3" color="red">
-              {`${votesCast}/${maxVotes}`}
+              {`${voteProgress}/${maxVotes}`}
             </Typography>
           </Stack>
         </Box>
       </CardContent>
     </Card>
   );
+};
+
+const useVoteProgress = (sessionId: number) => {
+  const [voteProgress, setVoteProgress] = useState<number>(0);
+
+  const stompClient = useStompClient();
+  stompClient?.subscribe(`/topic/voting-progress.${sessionId}`, (message) => {
+    setVoteProgress(JSON.parse(message.body));
+  });
+
+  return voteProgress;
 };
 
 export default VotingProgressCard;

@@ -1,5 +1,11 @@
-import {Box, CircularProgress, Grid, useMediaQuery, useTheme,} from "@mui/material";
-import {Container} from "@mui/system";
+import {
+  Box,
+  CircularProgress,
+  Grid,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { Container } from "@mui/system";
 import CenteredContainer from "Components/CenteredContainer";
 import PageHeader from "Components/PageHeader";
 import VotingInfoCard from "Components/VotingInfoCard";
@@ -9,9 +15,9 @@ import WithNavbar from "Components/WithNavbar";
 import useCurrentVoting from "Hooks/useCurrentVoting";
 import useCurrentVotingInfo from "Hooks/useCurrentVotingInfo";
 import useNumberParam from "Hooks/useNumberParam";
-import {FC} from "react";
-import {useStompClient} from "react-stomp-hooks";
-import {getAuthorizationHeader} from "Services/auth-service";
+import { FC } from "react";
+import { useStompClient } from "react-stomp-hooks";
+import { getAuthorizationHeader } from "Services/auth-service";
 
 interface VotingControlPageProps {
   invalidParamUrl: string;
@@ -58,7 +64,7 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
                   )}
                 </Grid>
                 <Grid item>
-                  <VotingProgressCard />
+                  <VotingProgressCard sessionId={id} />
                 </Grid>
               </Grid>
             </Grid>
@@ -76,10 +82,10 @@ const useNextVotingHandler = (sessionId: number) => {
   const stompClient = useStompClient();
 
   return () =>
-      stompClient?.publish({
-        destination: `/app/session/${sessionId}/next-voting`,
-        headers: {Authorization: getAuthorizationHeader()},
-      });
+    stompClient?.publish({
+      destination: `/app/session/${sessionId}/next-voting`,
+      headers: { Authorization: getAuthorizationHeader() },
+    });
 };
 
 export default VotingControlPage;

@@ -2,6 +2,12 @@ package pl.jkerro.covoting.voting_session;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.jkerro.covoting.users.ApplicationUser;
+import pl.jkerro.covoting.users.UserRepository;
+import pl.jkerro.covoting.voting_session.model.*;
+import pl.jkerro.covoting.voting_session.repositories.VoteRepository;
+import pl.jkerro.covoting.voting_session.repositories.VotingRepository;
+import pl.jkerro.covoting.voting_session.repositories.VotingSessionRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -13,6 +19,8 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     private final VotingSessionRepository votingSessionRepository;
     private final VotingRepository votingRepository;
+    private final UserRepository userRepository;
+    private final VoteRepository voteRepository;
 
     @Override
     public void createVotingSession(VotingSession session) {
@@ -81,10 +89,34 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Transactional
     @Override
-    public Optional<Voting> proceedToNextVoting(Integer id) {
-        Optional<VotingSession> session = votingSessionRepository.findById(id);
+    public Optional<Voting> proceedToNextVoting(Integer sessionId) {
+        Optional<VotingSession> session = votingSessionRepository.findById(sessionId);
         Optional<Voting> voting = session.flatMap(VotingSession::nextVoting);
         session.ifPresent(votingSessionRepository::save);
         return voting;
+    }
+
+    @Transactional
+    @Override
+    public Integer castVote(Integer sessionId, String email, VoteType voteType) {
+        Integer currentVotingId = findVotingSessionCurrentVotingInfoById(sessionId)
+                .map(CurrentVotingInfo::getVoting)
+                .map(Voting::getId)
+                .orElseThrow();
+
+        Integer userId = userRepository.findApplicationUserByEmail(email)
+                .map(ApplicationUser::getId)
+                .orElseThrow();
+
+        Vote vote = Vote.builder()
+                .userId(userId)
+                .votingId(currentVotingId)
+                .voteType(voteType)
+                .build();
+
+        voteRepository.save(vote);
+
+        // vote weight - user dependent
+        return 1;
     }
 }

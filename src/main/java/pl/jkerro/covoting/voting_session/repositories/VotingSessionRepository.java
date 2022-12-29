@@ -1,6 +1,7 @@
-package pl.jkerro.covoting.voting_session;
+package pl.jkerro.covoting.voting_session.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import pl.jkerro.covoting.voting_session.model.VotingSession;
 
 import java.util.List;
 

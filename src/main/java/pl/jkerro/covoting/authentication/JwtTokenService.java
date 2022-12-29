@@ -10,7 +10,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Function;
+
+import static pl.jkerro.covoting.authentication.JwtRequestFilter.BEARER_PREFIX;
 
 @Service
 public class JwtTokenService {
@@ -40,6 +43,19 @@ public class JwtTokenService {
                         .parseClaimsJws(token)
                         .getBody());
     }
+
+    public Optional<String> findUsernameFromHeader(String authHeader) {
+        return findJwtTokenFromHeader(authHeader).map(this::getUsernameFromToken);
+    }
+
+    public Optional<String> findJwtTokenFromHeader(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            return Optional.empty();
+        }
+        return Optional.of(authHeader.substring(BEARER_PREFIX.length()));
+    }
+
+
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);

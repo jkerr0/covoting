@@ -1,4 +1,4 @@
-package pl.jkerro.covoting.voting_session;
+package pl.jkerro.covoting.voting_session.model;
 
 import lombok.Builder;
 import lombok.Value;

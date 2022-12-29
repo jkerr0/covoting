@@ -19,7 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import pl.jkerro.covoting.users.ApplicationUser;
 import pl.jkerro.covoting.users.UserRepository;
 import pl.jkerro.covoting.users.UserType;
-import pl.jkerro.covoting.voting_session.VotingSessionRepository;
+import pl.jkerro.covoting.voting_session.repositories.VotingSessionRepository;
 
 import java.util.List;
 import java.util.Optional;
