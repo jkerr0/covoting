@@ -15,52 +15,61 @@ import ForwardIcon from "@mui/icons-material/Forward";
 
 interface VotingInfoCardProps {
   votingCount: number;
-  voting: Voting;
+  voting?: Voting;
   withControl: boolean;
+  onNextVoting?: () => void;
 }
 
 const TableCellNoBorder = (props: TableCellProps) => (
   <TableCell {...props} sx={{ borderBottom: "none" }} />
 );
 
-interface InfoProps extends Voting {
-  withControl: boolean;
-}
-
-const InfoTable: FC<InfoProps> = ({ name, majorityType, withControl }) => (
-  <Table size="small">
-    <TableBody>
-      <TableRow>
-        <TableCellNoBorder>Name:</TableCellNoBorder>
-        <TableCellNoBorder>{name}</TableCellNoBorder>
-      </TableRow>
-      <TableRow>
-        <TableCellNoBorder>Majority type:</TableCellNoBorder>
-        <TableCellNoBorder>{majorityType}</TableCellNoBorder>
-      </TableRow>
-      {withControl && (
-        <TableRow>
-          <TableCellNoBorder>
-            <Button endIcon={<ForwardIcon />}>Next voting</Button>
-          </TableCellNoBorder>
-        </TableRow>
-      )}
-    </TableBody>
-  </Table>
-);
-
 const VotingInfoCard: FC<VotingInfoCardProps> = ({
   votingCount,
   voting,
   withControl,
+  onNextVoting,
 }) => {
-  const { seq } = voting;
+  const InfoTable = () => {
+    return (
+      <Table size="small">
+        <TableBody>
+          {voting ? (
+            <>
+              <TableRow>
+                <TableCellNoBorder>Name:</TableCellNoBorder>
+                <TableCellNoBorder>{voting.name}</TableCellNoBorder>
+              </TableRow>
+              <TableRow>
+                <TableCellNoBorder>Majority type:</TableCellNoBorder>
+                <TableCellNoBorder>{voting.majorityType}</TableCellNoBorder>
+              </TableRow>
+            </>
+          ) : (
+            <TableRow>The voting hasn't started yet</TableRow>
+          )}
+          {withControl && (
+            <TableRow>
+              <TableCellNoBorder>
+                <Button endIcon={<ForwardIcon />} onClick={onNextVoting}>
+                  {voting ? "Next voting" : "Start voting"}
+                </Button>
+              </TableCellNoBorder>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    );
+  };
+
+  const votingProgress = (): string =>
+    voting ? `(${voting.seq}/${votingCount})` : "";
 
   return (
     <Card style={{ height: "100%" }}>
-      <CardHeader title={`Current voting (${seq}/${votingCount})`} />
+      <CardHeader title={"Current voting " + votingProgress()} />
       <CardContent>
-        <InfoTable {...voting} withControl={withControl} />
+        <InfoTable />
       </CardContent>
     </Card>
   );

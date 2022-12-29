@@ -10,6 +10,7 @@ import { Credentials, findCredentials } from "Services/auth-service";
 import { AuthContext } from "Utils/AuthContext";
 import VotingControlPage from "Pages/VotingControlPage";
 import VotingPage from "Pages/VotingPage";
+import { StompSessionProvider } from "react-stomp-hooks";
 
 const queryClient = new QueryClient();
 
@@ -20,39 +21,41 @@ function App() {
 
   return (
     <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <AuthContext.Provider value={{ credentials, setCredentials }}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <AuthenticatedOnly>
-                  <VotingSessionsPage />
-                </AuthenticatedOnly>
-              }
-            />
-            <Route
-              path="voting-control/:id"
-              element={
-                <AuthenticatedOnly>
-                  <VotingControlPage invalidParamUrl={"/voting-control"} />
-                </AuthenticatedOnly>
-              }
-            />
-            <Route
-              path="voting/:id"
-              element={
-                <AuthenticatedOnly>
-                  <VotingPage />
-                </AuthenticatedOnly>
-              }
-            />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="error" element={<ErrorPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </AuthContext.Provider>
-      </QueryClientProvider>
+      <StompSessionProvider url={"http://localhost:8080/api/covotingLiveApp"}>
+        <QueryClientProvider client={queryClient}>
+          <AuthContext.Provider value={{ credentials, setCredentials }}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <AuthenticatedOnly>
+                    <VotingSessionsPage />
+                  </AuthenticatedOnly>
+                }
+              />
+              <Route
+                path="voting-control/:id"
+                element={
+                  <AuthenticatedOnly>
+                    <VotingControlPage invalidParamUrl={"/voting-control"} />
+                  </AuthenticatedOnly>
+                }
+              />
+              <Route
+                path="voting/:id"
+                element={
+                  <AuthenticatedOnly>
+                    <VotingPage invalidParamUrl="/voting" />
+                  </AuthenticatedOnly>
+                }
+              />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="error" element={<ErrorPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </AuthContext.Provider>
+        </QueryClientProvider>
+      </StompSessionProvider>
     </BrowserRouter>
   );
 }

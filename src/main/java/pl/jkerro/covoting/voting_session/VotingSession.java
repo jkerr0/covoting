@@ -35,9 +35,26 @@ public class VotingSession {
     private Integer currentVotingSeq;
 
     public Optional<Voting> getCurrentVoting() {
-        if (currentVotingSeq.equals(0)) {
+        int votingIndex = currentVotingSeq - 1;
+        if (!didStart()) {
             return Optional.empty();
         }
-        return Optional.of(votingList.get(currentVotingSeq - 1));
+        return Optional.of(votingList.get(votingIndex));
+    }
+
+    public boolean didStart() {
+        return currentVotingSeq > 0;
+    }
+
+    public Optional<Voting> nextVoting() {
+        if (currentVotingSeq >= votingList.size()) {
+            return Optional.empty();
+        }
+        currentVotingSeq++;
+        return getCurrentVoting();
+    }
+
+    public void setDefaultCurrentVotingSeq() {
+        this.currentVotingSeq = 0;
     }
 }

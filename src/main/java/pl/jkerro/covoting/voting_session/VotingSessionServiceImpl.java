@@ -16,6 +16,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Override
     public void createVotingSession(VotingSession session) {
+        session.setDefaultCurrentVotingSeq();
         votingSessionRepository.save(session);
         saveSessionVotingList(session);
     }
@@ -26,6 +27,11 @@ public class VotingSessionServiceImpl implements VotingSessionService {
         if (session.getId() == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
+        votingSessionRepository.findById(session.getId())
+                .map(VotingSession::getCurrentVotingSeq)
+                .ifPresentOrElse(session::setCurrentVotingSeq,
+                        session::setDefaultCurrentVotingSeq);
+
         votingSessionRepository.save(session);
         votingRepository.deleteAllByVotingSession(session);
         saveSessionVotingList(session);
@@ -65,13 +71,20 @@ public class VotingSessionServiceImpl implements VotingSessionService {
     }
 
     @Override
-    public CurrentVotingInfo findVotingSessionCurrentVotingInfoById(Integer id) {
-        VotingSession session = votingSessionRepository.findById(id)
-                .orElseThrow();
+    public Optional<CurrentVotingInfo> findVotingSessionCurrentVotingInfoById(Integer id) {
+        return votingSessionRepository.findById(id)
+                .map(session -> CurrentVotingInfo.builder()
+                        .voting(session.getCurrentVoting().orElse(null))
+                        .votingCount(session.getVotingList().size())
+                        .build());
+    }
 
-        return CurrentVotingInfo.builder()
-                .voting(session.getCurrentVoting().orElse(null))
-                .votingCount(session.getVotingList().size())
-                .build();
+    @Transactional
+    @Override
+    public Optional<Voting> proceedToNextVoting(Integer id) {
+        Optional<VotingSession> session = votingSessionRepository.findById(id);
+        Optional<Voting> voting = session.flatMap(VotingSession::nextVoting);
+        session.ifPresent(votingSessionRepository::save);
+        return voting;
     }
 }

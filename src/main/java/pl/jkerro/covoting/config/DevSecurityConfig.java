@@ -48,6 +48,7 @@ public class DevSecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth/**").anonymous()
+                .antMatchers("/covotingLiveApp/**").anonymous()
                 .antMatchers("/admin/**").hasRole(UserType.ADMIN.toString())
                 .antMatchers("/voter/**").hasRole(UserType.VOTER.toString())
                 .anyRequest().authenticated()

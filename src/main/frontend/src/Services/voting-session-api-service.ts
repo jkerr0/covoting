@@ -1,13 +1,13 @@
 import axiosInstance from "Utils/axios-instance";
-import { Voting, VotingSession } from "Utils/data";
-import getHeadersConfig from "Services/default-headers-provider";
+import { CurrentVotingInfo, Voting, VotingSession } from "Utils/data";
+import getAxiosHeadersConfig from "Services/default-headers-provider";
 import { findCredentials } from "./auth-service";
 
 const apiUrl = "voting_sessions";
 
 const getApiUrl = () => {
   if (!findCredentials()) {
-    throw new Error('No credentials found');
+    throw new Error("No credentials found");
   }
   const userTypePrefix = findCredentials().credentials?.userType.toLowerCase();
   return `${userTypePrefix}/${apiUrl}`;
@@ -16,7 +16,7 @@ const getApiUrl = () => {
 export const getVotingSessions = async (): Promise<VotingSession[]> => {
   const response = await axiosInstance.get<VotingSession[]>(
     getApiUrl(),
-    getHeadersConfig()
+    getAxiosHeadersConfig()
   );
   return response.data;
 };
@@ -29,7 +29,7 @@ export const postVotingSession = async (
   const response = await axiosInstance.post<VotingSession>(
     getApiUrl(),
     newVotingSession,
-    getHeadersConfig()
+    getAxiosHeadersConfig()
   );
   return response.data;
 };
@@ -40,7 +40,7 @@ export const putVotingSession = async (
   const response = await axiosInstance.put<VotingSession>(
     getApiUrl(),
     editedSession,
-    getHeadersConfig()
+    getAxiosHeadersConfig()
   );
   return response.data;
 };
@@ -50,7 +50,7 @@ export const deleteVotingSession = async (
 ): Promise<void> => {
   return await axiosInstance.delete(
     `${getApiUrl()}/${deletedSession.id}`,
-    getHeadersConfig()
+    getAxiosHeadersConfig()
   );
 };
 
@@ -62,7 +62,17 @@ export const getVotingSessionVotingList = async (
   }
   const response = await axiosInstance.get(
     `${getApiUrl()}/${votingSession.id}/voting_list`,
-    getHeadersConfig()
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getVotingSessionCurrentVoting = async (
+  votingSessionId: number
+): Promise<CurrentVotingInfo> => {
+  const response = await axiosInstance.get(
+    `${apiUrl}/${votingSessionId}/current_voting`,
+    getAxiosHeadersConfig()
   );
   return response.data;
 };

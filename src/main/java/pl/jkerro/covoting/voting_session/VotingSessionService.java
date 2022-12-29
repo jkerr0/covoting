@@ -19,5 +19,7 @@ public interface VotingSessionService {
 
     Optional<VotingSession> findVotingSessionById(Integer id);
 
-    CurrentVotingInfo findVotingSessionCurrentVotingInfoById(Integer id);
+    Optional<CurrentVotingInfo> findVotingSessionCurrentVotingInfoById(Integer id);
+
+    Optional<Voting> proceedToNextVoting(Integer id);
 }
