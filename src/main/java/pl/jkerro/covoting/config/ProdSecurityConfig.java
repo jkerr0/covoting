@@ -1,11 +1,9 @@
 package pl.jkerro.covoting.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -22,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import pl.jkerro.covoting.authentication.JwtAuthenticationEntryPoint;
 import pl.jkerro.covoting.authentication.JwtRequestFilter;
+import pl.jkerro.covoting.users.UserType;
 
 import java.util.List;
 
@@ -48,8 +47,10 @@ public class ProdSecurityConfig {
                 .configurationSource(getCorsConfigurationSource())
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/**")
-                .anonymous()
+                .antMatchers("/auth/**").anonymous()
+                .antMatchers("/covotingLiveApp/**").anonymous()
+                .antMatchers("/admin/**").hasRole(UserType.ADMIN.toString())
+                .antMatchers("/voter/**").hasRole(UserType.VOTER.toString())
                 .anyRequest()
                 .authenticated()
                 .and()

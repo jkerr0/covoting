@@ -1,26 +1,32 @@
 export interface WithId {
-    id: number
+  id: number;
 }
 
 export interface WithSeq {
-    seq: number
+  seq: number;
 }
 export interface VotingSession extends WithId {
-    name: string,
-    startDate: string,
-    isPublished: boolean,
-    votingList: Voting[]
+  name: string;
+  startDate: string;
+  isPublished: boolean;
+  votingList: Voting[];
 }
 
 export enum MajorityType {
-    SIMPLE = 'SIMPLE',
-    ABSOLUTE = 'ABSOLUTE',
-    EFFECTIVE = 'EFFECTIVE',
-    UNANIMITY = 'UNANIMITY'
+  SIMPLE = "SIMPLE",
+  ABSOLUTE = "ABSOLUTE",
+  EFFECTIVE = "EFFECTIVE",
+  UNANIMITY = "UNANIMITY",
 }
 
 export interface Voting extends WithSeq {
-    id?: number,
-    name: string,
-    majorityType: MajorityType,
+  id?: number;
+  name: string;
+  majorityType: MajorityType;
+}
+
+export interface CurrentVotingInfo {
+  voting: Voting;
+  started: boolean;
+  votingCount: number;
 }

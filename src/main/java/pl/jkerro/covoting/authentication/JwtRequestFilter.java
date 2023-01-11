@@ -1,5 +1,6 @@
 package pl.jkerro.covoting.authentication;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,7 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
@@ -26,9 +26,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader(AUTH_HEADER);
-        getJwtTokenFromHeader(authHeader).ifPresent(jwtToken -> {
+        jwtTokenService.findJwtTokenFromHeader(authHeader).ifPresent(jwtToken -> {
             if (jwtTokenService.validateToken(jwtToken)) {
                 String username = jwtTokenService.getUsernameFromToken(jwtToken);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -38,12 +38,5 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         });
         filterChain.doFilter(request, response);
-    }
-
-    private Optional<String> getJwtTokenFromHeader(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
-            return Optional.empty();
-        }
-        return Optional.of(authHeader.substring(BEARER_PREFIX.length()));
     }
 }

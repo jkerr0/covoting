@@ -4,7 +4,7 @@ import CenteredContainer from "Components/CenteredContainer";
 
 const NotFoundPage: FC = () => {
   return (
-    <CenteredContainer>
+    <CenteredContainer maxWidth="sm">
       <Stack>
         <Typography textAlign={'center'}>Page not found</Typography>
         <Button href='/'>Go to home page</Button>

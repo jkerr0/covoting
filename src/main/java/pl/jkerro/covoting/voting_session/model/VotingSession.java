@@ -1,6 +1,5 @@
-package pl.jkerro.covoting.voting_session;
+package pl.jkerro.covoting.voting_session.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +10,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,4 +32,29 @@ public class VotingSession {
     private List<Voting> votingList = new ArrayList<>();
 
     private Boolean isPublished;
+    private Integer currentVotingSeq;
+
+    public Optional<Voting> getCurrentVoting() {
+        int votingIndex = currentVotingSeq - 1;
+        if (!didStart()) {
+            return Optional.empty();
+        }
+        return Optional.of(votingList.get(votingIndex));
+    }
+
+    public boolean didStart() {
+        return currentVotingSeq > 0;
+    }
+
+    public Optional<Voting> nextVoting() {
+        if (currentVotingSeq >= votingList.size()) {
+            return Optional.empty();
+        }
+        currentVotingSeq++;
+        return getCurrentVoting();
+    }
+
+    public void setDefaultCurrentVotingSeq() {
+        this.currentVotingSeq = 0;
+    }
 }
