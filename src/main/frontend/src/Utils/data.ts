@@ -30,3 +30,8 @@ export interface CurrentVotingInfo {
   started: boolean;
   votingCount: number;
 }
+
+export interface VotingProgress {
+  maxVotes: number;
+  currentVotes: number;
+}

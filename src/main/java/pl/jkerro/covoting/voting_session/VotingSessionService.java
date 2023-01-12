@@ -1,10 +1,8 @@
 package pl.jkerro.covoting.voting_session;
 
-import pl.jkerro.covoting.voting_session.model.CurrentVotingInfo;
-import pl.jkerro.covoting.voting_session.model.VoteType;
-import pl.jkerro.covoting.voting_session.model.Voting;
-import pl.jkerro.covoting.voting_session.model.VotingSession;
+import pl.jkerro.covoting.voting_session.model.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,5 +26,12 @@ public interface VotingSessionService {
 
     Optional<Voting> proceedToNextVoting(Integer id);
 
-    Integer castVote(Integer sessionId, String email, VoteType voteType);
+    void castVote(Integer sessionId, String email, VoteType voteType);
+
+    @Transactional
+    Optional<Voting> findCurrentVoting(Integer sessionId);
+
+    Optional<VotingProgress> findCurrentVotingProgress(Integer sessionId);
+
+    boolean canUserVote(String email, Integer sessionId);
 }

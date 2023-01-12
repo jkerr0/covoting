@@ -14,7 +14,7 @@ public class VotingSessionController {
 
     private final VotingSessionService votingSessionService;
 
-    @GetMapping("{id}/current_voting")
+    @GetMapping("{id}/current_voting/info")
     public CurrentVotingInfo getCurrentVotingInfo(@PathVariable Integer id) {
         return votingSessionService.findVotingSessionCurrentVotingInfoById(id)
                 .orElseThrow();

@@ -1,5 +1,10 @@
 import axiosInstance from "Utils/axios-instance";
-import { CurrentVotingInfo, Voting, VotingSession } from "Utils/data";
+import {
+  CurrentVotingInfo,
+  Voting,
+  VotingProgress,
+  VotingSession,
+} from "Utils/data";
 import getAxiosHeadersConfig from "Services/default-headers-provider";
 import { findCredentials } from "./auth-service";
 
@@ -67,11 +72,31 @@ export const getVotingSessionVotingList = async (
   return response.data;
 };
 
-export const getVotingSessionCurrentVoting = async (
+export const getVotingSessionCurrentVotingInfo = async (
   votingSessionId: number
 ): Promise<CurrentVotingInfo> => {
   const response = await axiosInstance.get(
-    `${apiUrl}/${votingSessionId}/current_voting`,
+    `${apiUrl}/${votingSessionId}/current_voting/info`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getVotingSessionCurrentVotingProgress = async (
+  votingSessionId: number
+): Promise<VotingProgress> => {
+  const response = await axiosInstance.get(
+    `${getApiUrl()}/${votingSessionId}/current_voting/progress`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getVotingEnabled = async (
+  votingSessionId: number
+): Promise<boolean> => {
+  const response = await axiosInstance.get(
+    `${getApiUrl()}/${votingSessionId}/current_voting/can_vote`,
     getAxiosHeadersConfig()
   );
   return response.data;

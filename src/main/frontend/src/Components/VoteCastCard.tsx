@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -44,7 +45,8 @@ type VoteType = "for" | "against" | "abstain";
 
 interface VoteCastCardProps {
   sessionId: number;
-  votingEnabled: boolean;
+  votingEnabled: boolean | undefined;
+  isLoading: boolean;
   onVote: () => void;
 }
 
@@ -52,6 +54,7 @@ const VoteCastCard: FC<VoteCastCardProps> = ({
   sessionId,
   votingEnabled,
   onVote,
+  isLoading,
 }) => {
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [voteType, setVoteType] = useState<VoteType | undefined>();
@@ -93,7 +96,9 @@ const VoteCastCard: FC<VoteCastCardProps> = ({
       <Card style={{ height: "100%" }}>
         <CardHeader title={"Cast a vote"} />
         <CardContent>
-          {votingEnabled ? (
+          {isLoading ? (
+            <CircularProgress />
+          ) : votingEnabled ? (
             <Box sx={{ display: "flex" }} justifyContent="space-around" gap={2}>
               <VoteButton color="success" onClick={() => handleVote("for")}>
                 Vote for

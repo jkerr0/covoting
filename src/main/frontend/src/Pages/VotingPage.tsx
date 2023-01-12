@@ -5,11 +5,12 @@ import PageHeader from "Components/PageHeader";
 import VoteCastCard from "Components/VoteCastCard";
 import VotingInfoCard from "Components/VotingInfoCard";
 import WithNavbar from "Components/WithNavbar";
-import useCurrentVoting from "Hooks/useCurrentVoting";
 import useCurrentVotingInfo from "Hooks/useCurrentVotingInfo";
+import useCurrentVotingWithCallback from "Hooks/useCurrentVotingWIthCallback";
 import useNumberParam from "Hooks/useNumberParam";
-import { FC, useEffect, useState } from "react";
-import { Voting } from "Utils/data";
+import { FC, useState } from "react";
+import { useQuery } from "react-query";
+import { getVotingEnabled } from "Services/voting-session-api-service";
 
 interface VotingPageProps {
   invalidParamUrl: string;
@@ -20,15 +21,21 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
   const theme = useTheme();
   const md = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { isLoading, votingInfo } = useCurrentVotingInfo(sessionId);
-  const currentVoting = useCurrentVoting(sessionId);
-  const { enabled, disable } = useVotingEnabled(currentVoting);
+  const { isLoading: isVotingInfoLoading, votingInfo } =
+    useCurrentVotingInfo(sessionId);
+  const {
+    enabled,
+    disable,
+    isLoading: isVotingEnabledLoading,
+    onVotingChange,
+  } = useVotingEnabled(sessionId);
+  const currentVoting = useCurrentVotingWithCallback(sessionId, onVotingChange);
 
   return (
     <WithNavbar>
       <Container maxWidth="xl">
         <PageHeader>Voting session</PageHeader>
-        {isLoading ? (
+        {isVotingInfoLoading ? (
           <CenteredContainer>
             <CircularProgress />
           </CenteredContainer>
@@ -53,6 +60,7 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
               <VoteCastCard
                 sessionId={sessionId}
                 votingEnabled={enabled}
+                isLoading={isVotingEnabledLoading}
                 onVote={disable}
               />
             </Grid>
@@ -63,13 +71,23 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
   );
 };
 
-const useVotingEnabled = (currentVoting: Voting | undefined) => {
-  const [enabled, setEnabled] = useState<boolean>(true);
-  useEffect(() => {
-    setEnabled(true);
-  }, [currentVoting]);
-  const disable = () => setEnabled(false);
-  return { enabled, disable };
+const useVotingEnabled = (sessionId: number) => {
+  const [enabled, setEnabled] = useState<boolean | undefined>();
+
+  const { isLoading } = useQuery(
+    "voting-enabled",
+    () => getVotingEnabled(sessionId),
+    {
+      onSuccess: (enabled) => setEnabled(enabled),
+    }
+  );
+
+  return {
+    enabled,
+    disable: () => setEnabled(false),
+    isLoading,
+    onVotingChange: () => setEnabled(true),
+  };
 };
 
 export default VotingPage;

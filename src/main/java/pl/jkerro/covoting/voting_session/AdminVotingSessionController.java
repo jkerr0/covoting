@@ -3,6 +3,7 @@ package pl.jkerro.covoting.voting_session;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pl.jkerro.covoting.voting_session.model.Voting;
+import pl.jkerro.covoting.voting_session.model.VotingProgress;
 import pl.jkerro.covoting.voting_session.model.VotingSession;
 
 import java.util.List;
@@ -38,5 +39,11 @@ public class AdminVotingSessionController {
     public VotingSession createSession(@RequestBody VotingSession votingSession) {
         votingSessionService.createVotingSession(votingSession);
         return votingSession;
+    }
+
+    @GetMapping("{id}/current_voting/progress")
+    public VotingProgress getCurrentVotingProgress(@PathVariable Integer id) {
+        return votingSessionService.findCurrentVotingProgress(id)
+                .orElse(null);
     }
 }

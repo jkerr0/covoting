@@ -46,7 +46,11 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
               </TableRow>
             </>
           ) : (
-            <TableRow>The voting hasn't started yet</TableRow>
+            <TableRow>
+              <TableCellNoBorder>
+                The voting hasn't started yet
+              </TableCellNoBorder>
+            </TableRow>
           )}
           {withControl && (
             <TableRow>

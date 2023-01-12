@@ -17,6 +17,7 @@ import java.util.Optional;
 @Service
 public class VotingSessionServiceImpl implements VotingSessionService {
 
+    private final VoteCountingService voteCountingService;
     private final VotingSessionRepository votingSessionRepository;
     private final VotingRepository votingRepository;
     private final UserRepository userRepository;
@@ -98,25 +99,51 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Transactional
     @Override
-    public Integer castVote(Integer sessionId, String email, VoteType voteType) {
+    public void castVote(Integer sessionId, String email, VoteType voteType) {
         Integer currentVotingId = findVotingSessionCurrentVotingInfoById(sessionId)
                 .map(CurrentVotingInfo::getVoting)
                 .map(Voting::getId)
                 .orElseThrow();
 
-        Integer userId = userRepository.findApplicationUserByEmail(email)
-                .map(ApplicationUser::getId)
+        ApplicationUser user = userRepository.findApplicationUserByEmail(email)
                 .orElseThrow();
 
         Vote vote = Vote.builder()
-                .userId(userId)
+                .userId(user.getId())
                 .votingId(currentVotingId)
                 .voteType(voteType)
+                .weight(user.getVoteWeight())
                 .build();
 
         voteRepository.save(vote);
+    }
 
-        // vote weight - user dependent
-        return 1;
+    @Transactional
+    @Override
+    public Optional<Voting> findCurrentVoting(Integer sessionId) {
+        return findVotingSessionById(sessionId).flatMap(VotingSession::getCurrentVoting);
+    }
+
+    @Override
+    public Optional<VotingProgress> findCurrentVotingProgress(Integer sessionId) {
+        return findCurrentVoting(sessionId)
+                .map(Voting::getId)
+                .map(voteCountingService::getVotingProgress);
+    }
+
+    @Override
+    public boolean canUserVote(String email, Integer sessionId) {
+        ApplicationUser user = userRepository.findApplicationUserByEmail(email).orElseThrow();
+        Voting voting = findCurrentVoting(sessionId).orElse(null);
+        if (voting == null) {
+            return false;
+        }
+        VoteId voteId = VoteId.builder()
+                .votingId(voting.getId())
+                .userId(user.getId())
+                .build();
+
+        return voteRepository.findById(voteId)
+                .isEmpty();
     }
 }

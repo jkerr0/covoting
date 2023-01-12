@@ -3,19 +3,22 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CircularProgress,
   Stack,
   Typography,
 } from "@mui/material";
+import useErrorHandler from "Hooks/useErrorHandler";
 import { FC, useState } from "react";
+import { useQuery } from "react-query";
 import { useStompClient } from "react-stomp-hooks";
+import { getVotingSessionCurrentVotingProgress } from "Services/voting-session-api-service";
 
 interface VotingProgressCardProps {
-  sessionId: number
+  sessionId: number;
 }
 
-const VotingProgressCard: FC<VotingProgressCardProps> = ({sessionId}) => {
-  const maxVotes = 10;
-  const voteProgress = useVoteProgress(sessionId);
+const VotingProgressCard: FC<VotingProgressCardProps> = ({ sessionId }) => {
+  const { currentVotes, maxVotes, isLoading } = useVoteProgress(sessionId);
 
   return (
     <Card>
@@ -24,9 +27,15 @@ const VotingProgressCard: FC<VotingProgressCardProps> = ({sessionId}) => {
         <Box bgcolor="#EEEEEE" px={3} py={1}>
           <Stack>
             <Typography variant="h6">Votes cast</Typography>
-            <Typography variant="h3" color="red">
-              {`${voteProgress}/${maxVotes}`}
-            </Typography>
+            {isLoading ? (
+              <CircularProgress />
+            ) : (
+              <Typography variant="h3" color="red">
+                {`${currentVotes !== undefined ? currentVotes : "-"}/${
+                  maxVotes !== undefined ? maxVotes : "-"
+                }`}
+              </Typography>
+            )}
           </Stack>
         </Box>
       </CardContent>
@@ -35,14 +44,25 @@ const VotingProgressCard: FC<VotingProgressCardProps> = ({sessionId}) => {
 };
 
 const useVoteProgress = (sessionId: number) => {
-  const [voteProgress, setVoteProgress] = useState<number>(0);
+  const [currentVotes, setCurrentVotes] = useState<number | undefined>();
+
+  const errorHandler = useErrorHandler();
+  const { data, isLoading } = useQuery(
+    "vote-progress",
+    () => getVotingSessionCurrentVotingProgress(sessionId),
+    { onError: errorHandler }
+  );
 
   const stompClient = useStompClient();
   stompClient?.subscribe(`/topic/voting-progress.${sessionId}`, (message) => {
-    setVoteProgress(JSON.parse(message.body));
+    setCurrentVotes(JSON.parse(message.body));
   });
 
-  return voteProgress;
+  return {
+    currentVotes: currentVotes || data?.currentVotes,
+    maxVotes: data?.maxVotes,
+    isLoading,
+  };
 };
 
 export default VotingProgressCard;
