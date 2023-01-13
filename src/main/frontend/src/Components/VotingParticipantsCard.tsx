@@ -1,13 +1,45 @@
-import { Card, CardContent, CardHeader } from '@mui/material'
-import React from 'react'
+import {
+  Avatar,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+} from "@mui/material";
+import usePresentList from "Hooks/usePresenceList";
+import React, { FC } from "react";
 
-const VotingPresenceCard = () => {
-  return (
-    <Card>
-        <CardHeader title={"List of participants"}/>
-        <CardContent/>
-    </Card>
-  )
+interface VotingPresenceCardProps {
+  sessionId: number;
 }
 
-export default VotingPresenceCard
+const VotingPresenceCard: FC<VotingPresenceCardProps> = ({ sessionId }) => {
+  const { presentList, isLoading } = usePresentList(sessionId);
+
+  return (
+    <Card>
+      <CardHeader title={"List of participants"} />
+      <CardContent>
+        {isLoading ? (
+          <CircularProgress />
+        ) : (
+          presentList && (
+            <List>
+              {presentList.map((user) => (
+                <ListItem>
+                  <ListItemAvatar><Avatar/></ListItemAvatar>
+                  <ListItemText>{user.fullName}</ListItemText>
+                </ListItem>
+              ))}
+            </List>
+          )
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default VotingPresenceCard;

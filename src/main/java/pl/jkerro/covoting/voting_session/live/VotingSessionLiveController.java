@@ -4,16 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.stereotype.Controller;
 import pl.jkerro.covoting.authentication.JwtTokenService;
+import pl.jkerro.covoting.users.ApplicationUser;
 import pl.jkerro.covoting.voting_session.VoteCountingService;
 import pl.jkerro.covoting.voting_session.model.VoteType;
 import pl.jkerro.covoting.voting_session.model.Voting;
 import pl.jkerro.covoting.voting_session.VotingSessionService;
-import pl.jkerro.covoting.voting_session.model.VotingSession;
 
 @RequiredArgsConstructor
 @MessageMapping("session/{sessionId}")
 @Controller
-public class VotingProgressController {
+public class VotingSessionLiveController {
 
     private final VotingSessionService votingSessionService;
     private final VoteCountingService voteCountingService;
@@ -39,6 +39,15 @@ public class VotingProgressController {
         return votingSessionService.findCurrentVoting(sessionId)
                 .map(Voting::getId)
                 .map(voteCountingService::getAllVotesCount)
+                .orElse(null);
+    }
+
+    @MessageMapping("presence-confirm")
+    @SendTo("/topic/presence-list.{sessionId}")
+    public ApplicationUser handlePresenceConfirm(@DestinationVariable Integer sessionId,
+                                                 @Header(name = "Authorization") String authorizationHeader) {
+        return jwtTokenService.findUsernameFromHeader(authorizationHeader)
+                .map(email -> votingSessionService.confirmPresence(email, sessionId))
                 .orElse(null);
     }
 

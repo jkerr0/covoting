@@ -24,14 +24,14 @@ interface VotingControlPageProps {
 }
 
 const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
-  const id = useNumberParam("id", invalidParamUrl);
+  const sessionId = useNumberParam("id", invalidParamUrl);
 
   const theme = useTheme();
   const smallerThanMedium = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { isLoading, votingInfo } = useCurrentVotingInfo(id);
-  const currentVoting = useCurrentVoting(id);
-  const nextVotingHandler = useNextVotingHandler(id);
+  const { isLoading, votingInfo } = useCurrentVotingInfo(sessionId);
+  const currentVoting = useCurrentVoting(sessionId);
+  const nextVotingHandler = useNextVotingHandler(sessionId);
 
   return (
     <WithNavbar>
@@ -59,17 +59,18 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
                       {...votingInfo}
                       voting={currentVoting || votingInfo.voting}
                       onNextVoting={nextVotingHandler}
+                      sessionId={sessionId}
                       withControl
                     />
                   )}
                 </Grid>
                 <Grid item>
-                  <VotingProgressCard sessionId={id} />
+                  <VotingProgressCard sessionId={sessionId} />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item sm={6}>
-              <VotingParticipantsCard />
+              <VotingParticipantsCard sessionId={sessionId} />
             </Grid>
           </Grid>
         </Container>

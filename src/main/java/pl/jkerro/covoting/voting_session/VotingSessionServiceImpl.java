@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pl.jkerro.covoting.users.ApplicationUser;
 import pl.jkerro.covoting.users.UserRepository;
 import pl.jkerro.covoting.voting_session.model.*;
+import pl.jkerro.covoting.voting_session.repositories.PresenceConfirmRepository;
 import pl.jkerro.covoting.voting_session.repositories.VoteRepository;
 import pl.jkerro.covoting.voting_session.repositories.VotingRepository;
 import pl.jkerro.covoting.voting_session.repositories.VotingSessionRepository;
@@ -22,6 +23,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
     private final VotingRepository votingRepository;
     private final UserRepository userRepository;
     private final VoteRepository voteRepository;
+    private final PresenceConfirmRepository presenceConfirmRepository;
 
     @Override
     public void createVotingSession(VotingSession session) {
@@ -105,8 +107,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
                 .map(Voting::getId)
                 .orElseThrow();
 
-        ApplicationUser user = userRepository.findApplicationUserByEmail(email)
-                .orElseThrow();
+        ApplicationUser user = getUser(email);
 
         Vote vote = Vote.builder()
                 .userId(user.getId())
@@ -133,7 +134,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Override
     public boolean canUserVote(String email, Integer sessionId) {
-        ApplicationUser user = userRepository.findApplicationUserByEmail(email).orElseThrow();
+        ApplicationUser user = getUser(email);
         Voting voting = findCurrentVoting(sessionId).orElse(null);
         if (voting == null) {
             return false;
@@ -145,5 +146,43 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
         return voteRepository.findById(voteId)
                 .isEmpty();
+    }
+
+    @Override
+    public ApplicationUser confirmPresence(String email, Integer sessionId) {
+        ApplicationUser user = getUser(email);
+        PresenceConfirm presenceConfirm = PresenceConfirm.builder()
+                .userId(user.getId())
+                .votingSessionId(sessionId)
+                .build();
+
+        presenceConfirmRepository.save(presenceConfirm);
+        return user;
+    }
+
+    @Override
+    public List<ApplicationUser> getPresentUsers(Integer sessionId) {
+        return presenceConfirmRepository.findAllByVotingSessionId(sessionId)
+                .stream()
+                .map(PresenceConfirm::getUserId)
+                .map(userRepository::findById)
+                .flatMap(Optional::stream)
+                .toList();
+    }
+
+    @Override
+    public boolean isUserPresent(String email, Integer sessionId) {
+        ApplicationUser user = getUser(email);
+        PresenceConfirmId confirmId = PresenceConfirmId.builder()
+                .userId(user.getId())
+                .votingSessionId(sessionId)
+                .build();
+
+        return presenceConfirmRepository.findById(confirmId)
+                .isPresent();
+    }
+
+    private ApplicationUser getUser(String email) {
+        return userRepository.findApplicationUserByEmail(email).orElseThrow();
     }
 }

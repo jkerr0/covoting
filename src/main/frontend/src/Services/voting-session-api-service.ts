@@ -1,5 +1,6 @@
 import axiosInstance from "Utils/axios-instance";
 import {
+  ApplicationUser,
   CurrentVotingInfo,
   Voting,
   VotingProgress,
@@ -101,3 +102,23 @@ export const getVotingEnabled = async (
   );
   return response.data;
 };
+
+export const getIsPresent = async (
+  votingSessionId: number
+): Promise<boolean> => {
+  const response = await axiosInstance.get(
+    `${getApiUrl()}/${votingSessionId}/is_present`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getPresentList = async (
+  votingSessionId: number
+): Promise<ApplicationUser[]> => {
+  const response = await axiosInstance.get(
+    `${apiUrl}/${votingSessionId}/present_list`,
+    getAxiosHeadersConfig()
+  )  
+  return response.data;
+}

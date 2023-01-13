@@ -1,5 +1,6 @@
 package pl.jkerro.covoting.voting_session;
 
+import pl.jkerro.covoting.users.ApplicationUser;
 import pl.jkerro.covoting.voting_session.model.*;
 
 import javax.transaction.Transactional;
@@ -34,4 +35,10 @@ public interface VotingSessionService {
     Optional<VotingProgress> findCurrentVotingProgress(Integer sessionId);
 
     boolean canUserVote(String email, Integer sessionId);
+
+    ApplicationUser confirmPresence(String email, Integer sessionId);
+
+    List<ApplicationUser> getPresentUsers(Integer sessionId);
+
+    boolean isUserPresent(String email, Integer sessionId);
 }

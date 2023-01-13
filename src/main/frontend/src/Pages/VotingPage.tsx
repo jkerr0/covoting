@@ -6,7 +6,7 @@ import VoteCastCard from "Components/VoteCastCard";
 import VotingInfoCard from "Components/VotingInfoCard";
 import WithNavbar from "Components/WithNavbar";
 import useCurrentVotingInfo from "Hooks/useCurrentVotingInfo";
-import useCurrentVotingWithCallback from "Hooks/useCurrentVotingWIthCallback";
+import useCurrentVoting from "Hooks/useCurrentVoting";
 import useNumberParam from "Hooks/useNumberParam";
 import { FC, useState } from "react";
 import { useQuery } from "react-query";
@@ -29,7 +29,7 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
     isLoading: isVotingEnabledLoading,
     onVotingChange,
   } = useVotingEnabled(sessionId);
-  const currentVoting = useCurrentVotingWithCallback(sessionId, onVotingChange);
+  const currentVoting = useCurrentVoting(sessionId, onVotingChange);
 
   return (
     <WithNavbar>
@@ -51,6 +51,7 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
               {votingInfo && (
                 <VotingInfoCard
                   {...votingInfo}
+                  sessionId={sessionId}
                   voting={currentVoting || votingInfo.voting}
                   withControl={false}
                 />

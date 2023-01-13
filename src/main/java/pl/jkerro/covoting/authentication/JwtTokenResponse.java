@@ -4,7 +4,7 @@ import lombok.Builder;
 import org.codehaus.plexus.util.StringUtils;
 import pl.jkerro.covoting.users.UserType;
 
-public record JwtTokenResponse(String jwtToken, String tokenType, UserType userType) {
+public record JwtTokenResponse(String jwtToken, String tokenType, UserType userType, String email) {
     @Builder public JwtTokenResponse {}
 
     public static final class JwtTokenResponseBuilder {

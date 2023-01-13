@@ -1,5 +1,6 @@
 package pl.jkerro.covoting.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +24,7 @@ public class ApplicationUser {
     private Integer id;
     private String email;
     private String fullName;
+    @JsonIgnore
     private String passwordHash;
     @Enumerated(EnumType.STRING)
     private UserType userType;

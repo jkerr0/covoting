@@ -12,12 +12,14 @@ import {
 import { FC } from "react";
 import { Voting } from "Utils/data";
 import ForwardIcon from "@mui/icons-material/Forward";
+import ConfirmPresenceButton from "Components/ConfirmPresenceButton";
 
 interface VotingInfoCardProps {
   votingCount: number;
   voting?: Voting;
   withControl: boolean;
   onNextVoting?: () => void;
+  sessionId: number;
 }
 
 const TableCellNoBorder = (props: TableCellProps) => (
@@ -29,6 +31,7 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
   voting,
   withControl,
   onNextVoting,
+  sessionId
 }) => {
   const InfoTable = () => {
     return (
@@ -48,10 +51,15 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
           ) : (
             <TableRow>
               <TableCellNoBorder>
-                The voting hasn't started yet
+                The voting session hasn't started yet.
               </TableCellNoBorder>
             </TableRow>
           )}
+          {!withControl && !voting &&
+            <TableRow>
+              <TableCellNoBorder><ConfirmPresenceButton sessionId={sessionId}/></TableCellNoBorder>
+            </TableRow>
+          }
           {withControl && (
             <TableRow>
               <TableCellNoBorder>

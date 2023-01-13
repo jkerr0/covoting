@@ -35,3 +35,9 @@ export interface VotingProgress {
   maxVotes: number;
   currentVotes: number;
 }
+
+export interface ApplicationUser extends WithId {
+  fullName: string;
+  email: string;
+  voteWeight: number;
+}
