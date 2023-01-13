@@ -20,7 +20,7 @@ const VotingPresenceCard: FC<VotingPresenceCardProps> = ({ sessionId }) => {
   const { presentList, isLoading } = usePresentList(sessionId);
 
   return (
-    <Card>
+    <Card sx={{height: '100%'}}>
       <CardHeader title={"List of participants"} />
       <CardContent>
         {isLoading ? (

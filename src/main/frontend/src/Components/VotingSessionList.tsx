@@ -12,7 +12,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import React, { FC, useContext, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { VotingSession } from "Utils/data";
 import VotingSessionAddEditForm from "./VotingSessionAddEditForm";
 import moment from "moment";
@@ -61,13 +61,13 @@ export const VotingSessionList: FC = () => {
   const {
     isLoading,
     data: votingSessions,
-    error,
   } = useQuery<VotingSession[], AxiosError>(
     Queries.VOTING_SESSIONS,
-    getVotingSessions
+    getVotingSessions,
+    {
+      onError: defaultErrorHandler,
+    }
   );
-
-  useErrorHandler(error);
 
   const deleteMutation = useMutation(deleteVotingSession, {
     onSuccess: () => {
@@ -102,7 +102,6 @@ export const VotingSessionList: FC = () => {
           )}
           {userType === UserType.VOTER && (
             <ButtonGroup>
-              <Button disabled>Confirm presence</Button>
               <Button href={`voting/${votingSession.id}`}>Go to voting</Button>
             </ButtonGroup>
           )}

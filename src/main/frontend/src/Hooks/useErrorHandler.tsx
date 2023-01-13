@@ -21,9 +21,11 @@ const useErrorHandler = (errorParam?: AxiosError | null) => {
       deleteCredentials();
       authContext.setCredentials(null)
       queryClient.invalidateQueries();
+      setError(undefined);
       navigate("/login", { state: { tokenExpired: true } });
     } else {
       console.error(error);
+      setError(undefined);
       navigate("/error");
     }
   }, [error, navigate]);

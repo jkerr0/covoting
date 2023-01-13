@@ -15,6 +15,7 @@ import WithNavbar from "Components/WithNavbar";
 import useCurrentVoting from "Hooks/useCurrentVoting";
 import useCurrentVotingInfo from "Hooks/useCurrentVotingInfo";
 import useNumberParam from "Hooks/useNumberParam";
+import useVoteProgress from "Hooks/useVoteProgress";
 import { FC } from "react";
 import { useStompClient } from "react-stomp-hooks";
 import { getAuthorizationHeader } from "Services/auth-service";
@@ -29,13 +30,20 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
   const theme = useTheme();
   const smallerThanMedium = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { isLoading, votingInfo } = useCurrentVotingInfo(sessionId);
+  const { isLoading: isVotingInfoLoading, votingInfo } =
+    useCurrentVotingInfo(sessionId);
+  const {
+    currentVotes,
+    maxVotes,
+    isLoading: isVoteProgressLoading,
+    resetProgress
+  } = useVoteProgress(sessionId);
   const currentVoting = useCurrentVoting(sessionId);
-  const nextVotingHandler = useNextVotingHandler(sessionId);
+  const nextVotingHandler = useNextVotingHandler(sessionId, resetProgress);
 
   return (
     <WithNavbar>
-      {isLoading ? (
+      {isVotingInfoLoading ? (
         <CenteredContainer>
           <Box sx={{ display: "flex" }}>
             <CircularProgress />
@@ -65,7 +73,11 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
                   )}
                 </Grid>
                 <Grid item>
-                  <VotingProgressCard sessionId={sessionId} />
+                  <VotingProgressCard
+                    currentVotes={currentVotes}
+                    maxVotes={maxVotes}
+                    isLoading={isVoteProgressLoading}
+                  />
                 </Grid>
               </Grid>
             </Grid>
@@ -79,14 +91,16 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
   );
 };
 
-const useNextVotingHandler = (sessionId: number) => {
+const useNextVotingHandler = (sessionId: number, resetProgress: () => void) => {
   const stompClient = useStompClient();
 
-  return () =>
+  return () => {
     stompClient?.publish({
       destination: `/app/session/${sessionId}/next-voting`,
       headers: { Authorization: getAuthorizationHeader() },
     });
+    resetProgress();
+  }
 };
 
 export default VotingControlPage;
