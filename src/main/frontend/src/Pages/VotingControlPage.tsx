@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { Container } from "@mui/system";
 import CenteredContainer from "Components/CenteredContainer";
+import NewResultPopup from "Components/NewResultPopup";
 import PageHeader from "Components/PageHeader";
 import VotingInfoCard from "Components/VotingInfoCard";
 import VotingParticipantsCard from "Components/VotingParticipantsCard";
@@ -15,6 +16,8 @@ import WithNavbar from "Components/WithNavbar";
 import useCurrentVoting from "Hooks/useCurrentVoting";
 import useCurrentVotingInfo from "Hooks/useCurrentVotingInfo";
 import useNumberParam from "Hooks/useNumberParam";
+import useVoteProgress from "Hooks/useVoteProgress";
+import useVotingSession from "Hooks/useVotingSession";
 import { FC } from "react";
 import { useStompClient } from "react-stomp-hooks";
 import { getAuthorizationHeader } from "Services/auth-service";
@@ -24,18 +27,28 @@ interface VotingControlPageProps {
 }
 
 const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
-  const id = useNumberParam("id", invalidParamUrl);
+  const sessionId = useNumberParam("id", invalidParamUrl);
 
   const theme = useTheme();
   const smallerThanMedium = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { isLoading, votingInfo } = useCurrentVotingInfo(id);
-  const currentVoting = useCurrentVoting(id);
-  const nextVotingHandler = useNextVotingHandler(id);
+  const { isLoading: isVotingInfoLoading, votingInfo } =
+    useCurrentVotingInfo(sessionId);
+  const {
+    currentVotes,
+    maxVotes,
+    isLoading: isVoteProgressLoading,
+    resetProgress,
+  } = useVoteProgress(sessionId);
+  const currentVoting = useCurrentVoting(sessionId);
+  const nextVotingHandler = useNextVotingHandler(sessionId, resetProgress);
+
+  const { votingSession, isLoading: isVotingSessionLoading } =
+    useVotingSession(sessionId);
 
   return (
     <WithNavbar>
-      {isLoading ? (
+      {isVotingInfoLoading ? (
         <CenteredContainer>
           <Box sx={{ display: "flex" }}>
             <CircularProgress />
@@ -43,7 +56,11 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
         </CenteredContainer>
       ) : (
         <Container maxWidth="xl" component={"div"}>
-          <PageHeader>Voting session control panel</PageHeader>
+          {isVotingSessionLoading ? (
+            <CircularProgress />
+          ) : (
+            <PageHeader>{`Voting session control panel for session: ${votingSession?.name}`}</PageHeader>
+          )}
           <Grid
             container
             justifyContent="space-around"
@@ -59,33 +76,41 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
                       {...votingInfo}
                       voting={currentVoting || votingInfo.voting}
                       onNextVoting={nextVotingHandler}
+                      sessionId={sessionId}
                       withControl
                     />
                   )}
                 </Grid>
                 <Grid item>
-                  <VotingProgressCard sessionId={id} />
+                  <VotingProgressCard
+                    currentVotes={currentVotes}
+                    maxVotes={maxVotes}
+                    isLoading={isVoteProgressLoading}
+                  />
                 </Grid>
               </Grid>
             </Grid>
             <Grid item sm={6}>
-              <VotingParticipantsCard />
+              <VotingParticipantsCard sessionId={sessionId} />
             </Grid>
           </Grid>
+          <NewResultPopup sessionId={sessionId} />
         </Container>
       )}
     </WithNavbar>
   );
 };
 
-const useNextVotingHandler = (sessionId: number) => {
+const useNextVotingHandler = (sessionId: number, resetProgress: () => void) => {
   const stompClient = useStompClient();
 
-  return () =>
+  return () => {
     stompClient?.publish({
       destination: `/app/session/${sessionId}/next-voting`,
       headers: { Authorization: getAuthorizationHeader() },
     });
+    resetProgress();
+  };
 };
 
 export default VotingControlPage;

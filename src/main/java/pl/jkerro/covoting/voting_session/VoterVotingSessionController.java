@@ -1,7 +1,9 @@
 package pl.jkerro.covoting.voting_session;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
+import pl.jkerro.covoting.authentication.JwtTokenService;
 import pl.jkerro.covoting.voting_session.model.Voting;
 import pl.jkerro.covoting.voting_session.model.VotingSession;
 
@@ -13,6 +15,7 @@ import java.util.List;
 public class VoterVotingSessionController {
 
     private final VotingSessionService votingSessionService;
+    private final JwtTokenService jwtTokenService;
 
     @GetMapping
     public List<VotingSession> getSessionsList() {
@@ -25,5 +28,21 @@ public class VoterVotingSessionController {
                 .filter(VotingSession::getIsPublished)
                 .map(VotingSession::getVotingList)
                 .orElse(List.of());
+    }
+
+    @GetMapping("{id}/current_voting/can_vote")
+    public boolean getCanUserVote(@PathVariable Integer id,
+                                  @RequestHeader("Authorization") String authHeader) {
+        return jwtTokenService.findUsernameFromHeader(authHeader)
+                .map(email -> votingSessionService.canUserVote(email, id))
+                .orElseThrow();
+    }
+
+    @GetMapping("{id}/is_present")
+    public boolean getIsPresent(@PathVariable Integer id,
+                                @RequestHeader("Authorization") String authHeader) {
+        return jwtTokenService.findUsernameFromHeader(authHeader)
+                .map(email -> votingSessionService.isUserPresent(email, id))
+                .orElseThrow();
     }
 }

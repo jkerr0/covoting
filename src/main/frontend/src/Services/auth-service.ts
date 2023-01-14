@@ -6,6 +6,7 @@ export interface Credentials {
   jwtToken: string;
   tokenType: string;
   userType: UserType;
+  email: string;
 }
 
 export interface OptionalCredentials {

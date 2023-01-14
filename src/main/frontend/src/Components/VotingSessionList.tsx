@@ -12,7 +12,7 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-import React, { FC, useContext, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { VotingSession } from "Utils/data";
 import VotingSessionAddEditForm from "./VotingSessionAddEditForm";
 import moment from "moment";
@@ -58,16 +58,12 @@ export const VotingSessionList: FC = () => {
 
   const queryClient = useQueryClient();
 
-  const {
-    isLoading,
-    data: votingSessions,
-    error,
-  } = useQuery<VotingSession[], AxiosError>(
-    Queries.VOTING_SESSIONS,
-    getVotingSessions
-  );
-
-  useErrorHandler(error);
+  const { isLoading, data: votingSessions } = useQuery<
+    VotingSession[],
+    AxiosError
+  >(Queries.VOTING_SESSIONS, getVotingSessions, {
+    onError: defaultErrorHandler,
+  });
 
   const deleteMutation = useMutation(deleteVotingSession, {
     onSuccess: () => {
@@ -82,6 +78,9 @@ export const VotingSessionList: FC = () => {
   };
 
   const Row = (votingSession: VotingSession) => {
+    const editDisabled =
+      votingSession.currentVotingSeq !== undefined &&
+      votingSession.currentVotingSeq > 0;
     return (
       <TableRow key={votingSession.id}>
         <TableCell>{votingSession.name}</TableCell>
@@ -89,23 +88,35 @@ export const VotingSessionList: FC = () => {
           {moment(votingSession.startDate).format(DATE_FORMAT)}
         </TableCell>
         <TableCell align="center">
-          {userType === UserType.ADMIN && (
-            <ButtonGroup>
-              <Button onClick={() => handleEdit(votingSession)}>Edit</Button>
-              <Button onClick={() => deleteMutation.mutate(votingSession)}>
-                Delete
-              </Button>
-              <Button href={`/voting-control/${votingSession.id}`}>
-                Go to control panel
-              </Button>
-            </ButtonGroup>
-          )}
-          {userType === UserType.VOTER && (
-            <ButtonGroup>
-              <Button disabled>Confirm presence</Button>
-              <Button href={`voting/${votingSession.id}`}>Go to voting</Button>
-            </ButtonGroup>
-          )}
+          <ButtonGroup>
+            {userType === UserType.ADMIN && (
+              <>
+                <Button
+                  onClick={() => handleEdit(votingSession)}
+                  disabled={editDisabled}
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => deleteMutation.mutate(votingSession)}
+                  disabled={editDisabled}
+                >
+                  Delete
+                </Button>
+                <Button href={`/voting-control/${votingSession.id}`}>
+                  Control panel
+                </Button>
+              </>
+            )}
+            {userType === UserType.VOTER && (
+              <>
+                <Button href={`voting/${votingSession.id}`}>
+                  Voting panel
+                </Button>
+              </>
+            )}
+            <Button href={`results/${votingSession.id}`}>Results</Button>
+          </ButtonGroup>
         </TableCell>
       </TableRow>
     );

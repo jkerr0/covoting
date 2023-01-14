@@ -1,5 +1,12 @@
 import axiosInstance from "Utils/axios-instance";
-import { CurrentVotingInfo, Voting, VotingSession } from "Utils/data";
+import {
+  ApplicationUser,
+  CurrentVotingInfo,
+  Voting,
+  VotingProgress,
+  VotingResult,
+  VotingSession,
+} from "Utils/data";
 import getAxiosHeadersConfig from "Services/default-headers-provider";
 import { findCredentials } from "./auth-service";
 
@@ -67,12 +74,72 @@ export const getVotingSessionVotingList = async (
   return response.data;
 };
 
-export const getVotingSessionCurrentVoting = async (
+export const getVotingSessionCurrentVotingInfo = async (
   votingSessionId: number
 ): Promise<CurrentVotingInfo> => {
   const response = await axiosInstance.get(
-    `${apiUrl}/${votingSessionId}/current_voting`,
+    `${apiUrl}/${votingSessionId}/current_voting/info`,
     getAxiosHeadersConfig()
   );
   return response.data;
 };
+
+export const getVotingSessionCurrentVotingProgress = async (
+  votingSessionId: number
+): Promise<VotingProgress> => {
+  const response = await axiosInstance.get(
+    `${getApiUrl()}/${votingSessionId}/current_voting/progress`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getVotingEnabled = async (
+  votingSessionId: number
+): Promise<boolean> => {
+  const response = await axiosInstance.get(
+    `${getApiUrl()}/${votingSessionId}/current_voting/can_vote`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getIsPresent = async (
+  votingSessionId: number
+): Promise<boolean> => {
+  const response = await axiosInstance.get(
+    `${getApiUrl()}/${votingSessionId}/is_present`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getPresentList = async (
+  votingSessionId: number
+): Promise<ApplicationUser[]> => {
+  const response = await axiosInstance.get(
+    `${apiUrl}/${votingSessionId}/present_list`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getResults = async (
+  votingSessionId: number
+): Promise<VotingResult[]> => {
+  const response = await axiosInstance.get(
+    `${apiUrl}/${votingSessionId}/results`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
+
+export const getVotingSessionById = async (
+  votingSessionId: number
+): Promise<VotingSession> => {
+  const response = await axiosInstance.get(
+    `${apiUrl}/${votingSessionId}`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+}

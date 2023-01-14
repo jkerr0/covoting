@@ -7,11 +7,13 @@ import org.hibernate.Hibernate;
 import javax.persistence.*;
 import java.util.Objects;
 
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Table
-@Entity(name = "voting")
+@Table(name = "voting")
+@Entity
 public class Voting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

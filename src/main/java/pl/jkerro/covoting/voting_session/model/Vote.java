@@ -20,6 +20,7 @@ public class Vote implements Persistable<VoteId> {
     Integer votingId;
     @Enumerated(EnumType.STRING)
     VoteType voteType;
+    Integer weight;
 
     @Override
     public VoteId getId() {

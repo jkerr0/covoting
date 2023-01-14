@@ -3,19 +3,19 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CircularProgress,
   Stack,
   Typography,
 } from "@mui/material";
-import { FC, useState } from "react";
-import { useStompClient } from "react-stomp-hooks";
+import { FC } from "react";
 
 interface VotingProgressCardProps {
-  sessionId: number
+  currentVotes: number | undefined;
+  maxVotes: number | undefined;
+  isLoading: boolean;
 }
 
-const VotingProgressCard: FC<VotingProgressCardProps> = ({sessionId}) => {
-  const maxVotes = 10;
-  const voteProgress = useVoteProgress(sessionId);
+const VotingProgressCard: FC<VotingProgressCardProps> = ({ currentVotes, maxVotes, isLoading }) => {
 
   return (
     <Card>
@@ -24,9 +24,15 @@ const VotingProgressCard: FC<VotingProgressCardProps> = ({sessionId}) => {
         <Box bgcolor="#EEEEEE" px={3} py={1}>
           <Stack>
             <Typography variant="h6">Votes cast</Typography>
-            <Typography variant="h3" color="red">
-              {`${voteProgress}/${maxVotes}`}
-            </Typography>
+            {isLoading ? (
+              <CircularProgress />
+            ) : (
+              <Typography variant="h3" color="red">
+                {`${currentVotes !== undefined ? currentVotes : "-"}/${
+                  maxVotes !== undefined ? maxVotes : "-"
+                }`}
+              </Typography>
+            )}
           </Stack>
         </Box>
       </CardContent>
@@ -34,15 +40,5 @@ const VotingProgressCard: FC<VotingProgressCardProps> = ({sessionId}) => {
   );
 };
 
-const useVoteProgress = (sessionId: number) => {
-  const [voteProgress, setVoteProgress] = useState<number>(0);
-
-  const stompClient = useStompClient();
-  stompClient?.subscribe(`/topic/voting-progress.${sessionId}`, (message) => {
-    setVoteProgress(JSON.parse(message.body));
-  });
-
-  return voteProgress;
-};
 
 export default VotingProgressCard;

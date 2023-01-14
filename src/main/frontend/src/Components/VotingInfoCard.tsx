@@ -9,15 +9,18 @@ import {
   TableCellProps,
   TableRow,
 } from "@mui/material";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Voting } from "Utils/data";
 import ForwardIcon from "@mui/icons-material/Forward";
+import ConfirmPresenceButton from "Components/ConfirmPresenceButton";
 
 interface VotingInfoCardProps {
   votingCount: number;
   voting?: Voting;
+  sessionClosed: boolean;
   withControl: boolean;
   onNextVoting?: () => void;
+  sessionId: number;
 }
 
 const TableCellNoBorder = (props: TableCellProps) => (
@@ -29,12 +32,33 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
   voting,
   withControl,
   onNextVoting,
+  sessionId,
+  sessionClosed,
 }) => {
+  const nextVotingButtonLabel = () => {
+    const lastVoting = voting && voting.seq === votingCount;
+    if (voting && lastVoting) {
+      return "Finish session";
+    } else if (!lastVoting) {
+      return "Next voting";
+    } else {
+      return "Start session";
+    }
+  };
+
+  const [finished, setFinished] = useState<boolean>(sessionClosed);
+  const handleNextVoting = () => {
+    if (voting?.seq === votingCount) {
+      setFinished(true);
+    }
+    onNextVoting && onNextVoting();
+  };
+
   const InfoTable = () => {
     return (
       <Table size="small">
         <TableBody>
-          {voting ? (
+          {voting && !finished? (
             <>
               <TableRow>
                 <TableCellNoBorder>Name:</TableCellNoBorder>
@@ -46,13 +70,24 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
               </TableRow>
             </>
           ) : (
-            <TableRow>The voting hasn't started yet</TableRow>
-          )}
-          {withControl && (
             <TableRow>
               <TableCellNoBorder>
-                <Button endIcon={<ForwardIcon />} onClick={onNextVoting}>
-                  {voting ? "Next voting" : "Start voting"}
+                { finished ? "The voting session has finished" : "The voting session hasn't started yet." }
+              </TableCellNoBorder>
+            </TableRow>
+          )}
+          {!withControl && !voting && (
+            <TableRow>
+              <TableCellNoBorder>
+                <ConfirmPresenceButton sessionId={sessionId} />
+              </TableCellNoBorder>
+            </TableRow>
+          )}
+          {withControl && !finished && (
+            <TableRow>
+              <TableCellNoBorder>
+                <Button endIcon={<ForwardIcon />} onClick={handleNextVoting}>
+                  {nextVotingButtonLabel()}
                 </Button>
               </TableCellNoBorder>
             </TableRow>
@@ -62,12 +97,12 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
     );
   };
 
-  const votingProgress = (): string =>
+  const votingSessionProgress = (): string =>
     voting ? `(${voting.seq}/${votingCount})` : "";
 
   return (
     <Card style={{ height: "100%" }}>
-      <CardHeader title={"Current voting " + votingProgress()} />
+      <CardHeader title={"Current voting " + votingSessionProgress()} />
       <CardContent>
         <InfoTable />
       </CardContent>

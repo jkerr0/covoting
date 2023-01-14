@@ -5,8 +5,7 @@ import lombok.Value;
 
 @Builder
 @Value
-public class CurrentVotingInfo {
-    Voting voting;
-    Integer votingCount;
-    boolean sessionClosed;
+public class VotingProgress {
+    Integer currentVotes;
+    Integer maxVotes;
 }

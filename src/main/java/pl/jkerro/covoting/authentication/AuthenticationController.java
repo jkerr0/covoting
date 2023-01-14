@@ -29,10 +29,12 @@ public class AuthenticationController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwtToken = jwtTokenService.generateToken(authentication);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         JwtTokenResponse response = JwtTokenResponse.builder()
                 .tokenType(JwtTokenType.BEARER)
                 .jwtToken(jwtToken)
-                .userType(getUserType((UserDetails) authentication.getPrincipal()))
+                .userType(getUserType(userDetails))
+                .email(userDetails.getUsername())
                 .build();
 
         return ResponseEntity.ok()

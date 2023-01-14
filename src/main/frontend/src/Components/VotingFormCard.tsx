@@ -104,12 +104,6 @@ const VotingFormCard: FC<VotingCardProps> = ({
                   ))}
                 </Select>
               </FormControl>
-              <FormControl>
-                <InputLabel id="resolution-field-label">Resolution</InputLabel>
-                <Select labelId="resolution-field-label" label="Resolution">
-                  <MenuItem>TODO</MenuItem>
-                </Select>
-              </FormControl>
             </Stack>
           </Grid>
           <Grid item xl={1}>
