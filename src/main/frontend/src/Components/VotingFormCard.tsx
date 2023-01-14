@@ -73,14 +73,19 @@ const VotingFormCard: FC<VotingCardProps> = ({
     </Button>
   );
 
-  const theme = useTheme()
-  const smallBreakpoint = useMediaQuery(theme.breakpoints.down("md"))
+  const theme = useTheme();
+  const smallBreakpoint = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
     <Card>
       <CardContent>
         <Typography>{cardTitle}</Typography>
-        <Grid container alignItems="center" justifyContent="space-evenly" spacing={1}>
+        <Grid
+          container
+          alignItems="center"
+          justifyContent="space-evenly"
+          spacing={1}
+        >
           <Grid item xl={10}>
             <Stack spacing={2}>
               <TextField
@@ -107,7 +112,11 @@ const VotingFormCard: FC<VotingCardProps> = ({
             </Stack>
           </Grid>
           <Grid item xl={1}>
-            <Grid container spacing={2} direction={smallBreakpoint ? 'row':'column'}>
+            <Grid
+              container
+              spacing={2}
+              direction={smallBreakpoint ? "row" : "column"}
+            >
               <Grid item>
                 <UpButton />
               </Grid>
