@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.jkerro.covoting.users.ApplicationUser;
 import pl.jkerro.covoting.voting_session.model.CurrentVotingInfo;
+import pl.jkerro.covoting.voting_session.model.VotingResult;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class VotingSessionController {
 
     private final VotingSessionService votingSessionService;
+    private final VoteResultService voteResultService;
 
     @GetMapping("{id}/current_voting/info")
     public CurrentVotingInfo getCurrentVotingInfo(@PathVariable Integer id) {
@@ -28,5 +30,10 @@ public class VotingSessionController {
         return votingSessionService.getPresentUsers(id)
                 .stream()
                 .toList();
+    }
+
+    @GetMapping("{id}/results")
+    public List<VotingResult> getResults(@PathVariable Integer id) {
+        return voteResultService.calculateResultsForVotingSession(id);
     }
 }

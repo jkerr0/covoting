@@ -11,6 +11,7 @@ import useNumberParam from "Hooks/useNumberParam";
 import { FC, useState } from "react";
 import { useQuery } from "react-query";
 import { getVotingEnabled } from "Services/voting-session-api-service";
+import NewResultPopup from "Components/NewResultPopup";
 
 interface VotingPageProps {
   invalidParamUrl: string;
@@ -67,6 +68,7 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
             </Grid>
           </Grid>
         )}
+        <NewResultPopup sessionId={sessionId} />
       </Container>
     </WithNavbar>
   );

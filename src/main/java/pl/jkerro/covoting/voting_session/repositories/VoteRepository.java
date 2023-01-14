@@ -8,15 +8,15 @@ import pl.jkerro.covoting.voting_session.model.VoteId;
 
 public interface VoteRepository extends CrudRepository<Vote, VoteId> {
 
-    @Query(value = "SELECT sum(weight) FROM Vote where votingId=:votingId")
+    @Query(value = "SELECT coalesce(sum(weight), 0) FROM Vote where votingId=:votingId")
     Integer sumAllByVotingId(@Param("votingId") Integer votingId);
 
-    @Query(value = "SELECT sum(weight) FROM Vote where votingId=:votingId and voteType='FOR'")
+    @Query(value = "SELECT coalesce(sum(weight), 0) FROM Vote where votingId=:votingId and voteType='FOR'")
     Integer sumForByVotingId(@Param("votingId") Integer votingId);
 
-    @Query(value = "SELECT sum(weight) FROM Vote where votingId=:votingId and voteType='AGAINST'")
+    @Query(value = "SELECT coalesce(sum(weight), 0) FROM Vote where votingId=:votingId and voteType='AGAINST'")
     Integer sumAgainstByVotingId(@Param("votingId") Integer votingId);
 
-    @Query(value = "SELECT sum(weight) FROM Vote where votingId=:votingId and voteType='ABSTAIN'")
+    @Query(value = "SELECT coalesce(sum(weight), 0) FROM Vote where votingId=:votingId and voteType='ABSTAIN'")
     Integer sumAbstainedByVotingId(@Param("votingId") Integer votingId);
 }

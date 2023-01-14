@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.jkerro.covoting.users.ApplicationUser;
 import pl.jkerro.covoting.users.UserRepository;
+import pl.jkerro.covoting.users.UserType;
 import pl.jkerro.covoting.voting_session.model.*;
 import pl.jkerro.covoting.voting_session.repositories.PresenceConfirmRepository;
 import pl.jkerro.covoting.voting_session.repositories.VoteRepository;
@@ -92,7 +93,14 @@ public class VotingSessionServiceImpl implements VotingSessionService {
 
     @Transactional
     @Override
-    public Optional<Voting> proceedToNextVoting(Integer sessionId) {
+    public Optional<Voting> proceedToNextVoting(Integer sessionId, String email) {
+        boolean canUserProceed = userRepository.findApplicationUserByEmail(email)
+                .map(ApplicationUser::getUserType)
+                .filter(UserType.ADMIN::equals)
+                .isPresent();
+        if (!canUserProceed) {
+            return Optional.empty();
+        }
         Optional<VotingSession> session = votingSessionRepository.findById(sessionId);
         Optional<Voting> voting = session.flatMap(VotingSession::nextVoting);
         session.ifPresent(votingSessionRepository::save);

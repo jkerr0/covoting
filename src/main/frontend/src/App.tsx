@@ -11,6 +11,7 @@ import { AuthContext } from "Utils/AuthContext";
 import VotingControlPage from "Pages/VotingControlPage";
 import VotingPage from "Pages/VotingPage";
 import { StompSessionProvider } from "react-stomp-hooks";
+import ResultsPage from "Pages/ResultsPage";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,14 @@ function App() {
                 element={
                   <AuthenticatedOnly>
                     <VotingPage invalidParamUrl="/voting" />
+                  </AuthenticatedOnly>
+                }
+              />
+              <Route
+                path="results/:id"
+                element={
+                  <AuthenticatedOnly>
+                    <ResultsPage invalidParamUrl="/results" />
                   </AuthenticatedOnly>
                 }
               />

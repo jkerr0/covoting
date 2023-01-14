@@ -41,3 +41,11 @@ export interface ApplicationUser extends WithId {
   email: string;
   voteWeight: number;
 }
+
+export interface VotingResult {
+  name: string;
+  forCount: number;
+  againstCount: number;
+  abstainCount: number;
+  accepted: boolean;
+}

@@ -74,12 +74,12 @@ const VotingInfoCard: FC<VotingInfoCardProps> = ({
     );
   };
 
-  const votingProgress = (): string =>
+  const votingSessionProgress = (): string =>
     voting ? `(${voting.seq}/${votingCount})` : "";
 
   return (
     <Card style={{ height: "100%" }}>
-      <CardHeader title={"Current voting " + votingProgress()} />
+      <CardHeader title={"Current voting " + votingSessionProgress()} />
       <CardContent>
         <InfoTable />
       </CardContent>

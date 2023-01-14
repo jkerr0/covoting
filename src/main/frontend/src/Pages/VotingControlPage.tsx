@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { Container } from "@mui/system";
 import CenteredContainer from "Components/CenteredContainer";
+import NewResultPopup from "Components/NewResultPopup";
 import PageHeader from "Components/PageHeader";
 import VotingInfoCard from "Components/VotingInfoCard";
 import VotingParticipantsCard from "Components/VotingParticipantsCard";
@@ -36,7 +37,7 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
     currentVotes,
     maxVotes,
     isLoading: isVoteProgressLoading,
-    resetProgress
+    resetProgress,
   } = useVoteProgress(sessionId);
   const currentVoting = useCurrentVoting(sessionId);
   const nextVotingHandler = useNextVotingHandler(sessionId, resetProgress);
@@ -85,6 +86,7 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
               <VotingParticipantsCard sessionId={sessionId} />
             </Grid>
           </Grid>
+          <NewResultPopup sessionId={sessionId} />
         </Container>
       )}
     </WithNavbar>
@@ -100,7 +102,7 @@ const useNextVotingHandler = (sessionId: number, resetProgress: () => void) => {
       headers: { Authorization: getAuthorizationHeader() },
     });
     resetProgress();
-  }
+  };
 };
 
 export default VotingControlPage;

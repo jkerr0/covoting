@@ -25,7 +25,7 @@ public interface VotingSessionService {
 
     Optional<CurrentVotingInfo> findVotingSessionCurrentVotingInfoById(Integer id);
 
-    Optional<Voting> proceedToNextVoting(Integer id);
+    Optional<Voting> proceedToNextVoting(Integer id, String email);
 
     void castVote(Integer sessionId, String email, VoteType voteType);
 

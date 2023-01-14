@@ -58,16 +58,12 @@ export const VotingSessionList: FC = () => {
 
   const queryClient = useQueryClient();
 
-  const {
-    isLoading,
-    data: votingSessions,
-  } = useQuery<VotingSession[], AxiosError>(
-    Queries.VOTING_SESSIONS,
-    getVotingSessions,
-    {
-      onError: defaultErrorHandler,
-    }
-  );
+  const { isLoading, data: votingSessions } = useQuery<
+    VotingSession[],
+    AxiosError
+  >(Queries.VOTING_SESSIONS, getVotingSessions, {
+    onError: defaultErrorHandler,
+  });
 
   const deleteMutation = useMutation(deleteVotingSession, {
     onSuccess: () => {
@@ -89,22 +85,27 @@ export const VotingSessionList: FC = () => {
           {moment(votingSession.startDate).format(DATE_FORMAT)}
         </TableCell>
         <TableCell align="center">
-          {userType === UserType.ADMIN && (
-            <ButtonGroup>
-              <Button onClick={() => handleEdit(votingSession)}>Edit</Button>
-              <Button onClick={() => deleteMutation.mutate(votingSession)}>
-                Delete
-              </Button>
-              <Button href={`/voting-control/${votingSession.id}`}>
-                Go to control panel
-              </Button>
-            </ButtonGroup>
-          )}
-          {userType === UserType.VOTER && (
-            <ButtonGroup>
-              <Button href={`voting/${votingSession.id}`}>Go to voting</Button>
-            </ButtonGroup>
-          )}
+          <ButtonGroup>
+            {userType === UserType.ADMIN && (
+              <>
+                <Button onClick={() => handleEdit(votingSession)}>Edit</Button>
+                <Button onClick={() => deleteMutation.mutate(votingSession)}>
+                  Delete
+                </Button>
+                <Button href={`/voting-control/${votingSession.id}`}>
+                  Control panel
+                </Button>
+              </>
+            )}
+            {userType === UserType.VOTER && (
+              <>
+                <Button href={`voting/${votingSession.id}`}>
+                  Go to voting
+                </Button>
+              </>
+            )}
+            <Button href={`results/${votingSession.id}`}>Results</Button>
+          </ButtonGroup>
         </TableCell>
       </TableRow>
     );

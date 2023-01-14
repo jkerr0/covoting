@@ -4,6 +4,7 @@ import {
   CurrentVotingInfo,
   Voting,
   VotingProgress,
+  VotingResult,
   VotingSession,
 } from "Utils/data";
 import getAxiosHeadersConfig from "Services/default-headers-provider";
@@ -119,6 +120,16 @@ export const getPresentList = async (
   const response = await axiosInstance.get(
     `${apiUrl}/${votingSessionId}/present_list`,
     getAxiosHeadersConfig()
-  )  
+  );
   return response.data;
-}
+};
+
+export const getResults = async (
+  votingSessionId: number
+): Promise<VotingResult[]> => {
+  const response = await axiosInstance.get(
+    `${apiUrl}/${votingSessionId}/results`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+};
