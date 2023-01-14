@@ -10,13 +10,14 @@ export interface VotingSession extends WithId {
   startDate: string;
   isPublished: boolean;
   votingList: Voting[];
+  isClosed?: boolean;
+  currentVotingSeq?: number;
 }
 
 export enum MajorityType {
   SIMPLE = "SIMPLE",
   ABSOLUTE = "ABSOLUTE",
   EFFECTIVE = "EFFECTIVE",
-  UNANIMITY = "UNANIMITY",
 }
 
 export interface Voting extends WithSeq {
@@ -29,6 +30,7 @@ export interface CurrentVotingInfo {
   voting: Voting;
   started: boolean;
   votingCount: number;
+  sessionClosed: boolean;
 }
 
 export interface VotingProgress {

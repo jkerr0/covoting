@@ -47,6 +47,7 @@ interface VoteCastCardProps {
   sessionId: number;
   votingEnabled: boolean | undefined;
   isLoading: boolean;
+  noNextVoting: boolean;
   onVote: () => void;
 }
 
@@ -55,6 +56,7 @@ const VoteCastCard: FC<VoteCastCardProps> = ({
   votingEnabled,
   onVote,
   isLoading,
+  noNextVoting,
 }) => {
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [voteType, setVoteType] = useState<VoteType | undefined>();
@@ -111,7 +113,11 @@ const VoteCastCard: FC<VoteCastCardProps> = ({
               </VoteButton>
             </Box>
           ) : (
-            <Typography>Please wait for the next voting</Typography>
+            <Typography>
+              {noNextVoting
+                ? "There will be no more votings."
+                : "Please wait for the next voting."}
+            </Typography>
           )}
         </CardContent>
       </Card>

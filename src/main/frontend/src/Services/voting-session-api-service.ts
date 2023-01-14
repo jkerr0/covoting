@@ -133,3 +133,13 @@ export const getResults = async (
   );
   return response.data;
 };
+
+export const getVotingSessionById = async (
+  votingSessionId: number
+): Promise<VotingSession> => {
+  const response = await axiosInstance.get(
+    `${apiUrl}/${votingSessionId}`,
+    getAxiosHeadersConfig()
+  );
+  return response.data;
+}

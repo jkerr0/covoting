@@ -65,8 +65,11 @@ public class VotingSessionServiceImpl implements VotingSessionService {
         return votingSessionRepository.findAllByIsPublishedOrderByStartDateDesc(true);
     }
 
+    @Transactional
     @Override
     public void deleteSessionById(Integer id) {
+        presenceConfirmRepository.deleteAllByVotingSessionId(id);
+        votingRepository.deleteAllByVotingSessionId(id);
         votingSessionRepository.deleteById(id);
     }
 
@@ -88,6 +91,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
                 .map(session -> CurrentVotingInfo.builder()
                         .voting(session.getCurrentVoting().orElse(null))
                         .votingCount(session.getVotingList().size())
+                        .sessionClosed(session.getIsClosed())
                         .build());
     }
 
@@ -101,10 +105,17 @@ public class VotingSessionServiceImpl implements VotingSessionService {
         if (!canUserProceed) {
             return Optional.empty();
         }
-        Optional<VotingSession> session = votingSessionRepository.findById(sessionId);
-        Optional<Voting> voting = session.flatMap(VotingSession::nextVoting);
-        session.ifPresent(votingSessionRepository::save);
-        return voting;
+        VotingSession session = votingSessionRepository.findById(sessionId).orElseThrow();
+        boolean lastVoting = session.getCurrentVotingSeq().equals(session.getVotingList().size());
+        if (lastVoting) {
+            session.setIsClosed(true);
+            votingSessionRepository.save(session);
+            return Optional.empty();
+        } else {
+            Optional<Voting> voting = session.nextVoting();
+            votingSessionRepository.save(session);
+            return voting;
+        }
     }
 
     @Transactional

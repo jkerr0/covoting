@@ -12,6 +12,7 @@ import { FC, useState } from "react";
 import { useQuery } from "react-query";
 import { getVotingEnabled } from "Services/voting-session-api-service";
 import NewResultPopup from "Components/NewResultPopup";
+import useVotingSession from "Hooks/useVotingSession";
 
 interface VotingPageProps {
   invalidParamUrl: string;
@@ -31,12 +32,22 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
     onVotingChange,
   } = useVotingEnabled(sessionId);
   const currentVoting = useCurrentVoting(sessionId, onVotingChange);
+  const voting = currentVoting || votingInfo?.voting;
+
+  const { votingSession, isLoading: isVotingSessionLoading } =
+    useVotingSession(sessionId);
 
   return (
     <WithNavbar>
       <Container maxWidth="xl">
-        <PageHeader>Voting session</PageHeader>
-        {isVotingInfoLoading ? (
+        {isVotingSessionLoading ? (
+          <CircularProgress />
+        ) : (
+          <PageHeader>{`Voting session voting panel for session: ${votingSession?.name}`}</PageHeader>
+        )}
+        {votingInfo?.sessionClosed ? (
+          "Session closed"
+        ) : isVotingInfoLoading ? (
           <CenteredContainer>
             <CircularProgress />
           </CenteredContainer>
@@ -53,7 +64,7 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
                 <VotingInfoCard
                   {...votingInfo}
                   sessionId={sessionId}
-                  voting={currentVoting || votingInfo.voting}
+                  voting={voting}
                   withControl={false}
                 />
               )}
@@ -64,6 +75,7 @@ const VotingPage: FC<VotingPageProps> = ({ invalidParamUrl }) => {
                 votingEnabled={enabled}
                 isLoading={isVotingEnabledLoading}
                 onVote={disable}
+                noNextVoting={voting?.seq === votingInfo?.votingCount}
               />
             </Grid>
           </Grid>

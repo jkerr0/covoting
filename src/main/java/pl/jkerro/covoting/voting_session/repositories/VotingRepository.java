@@ -11,6 +11,8 @@ import java.util.List;
 public interface VotingRepository extends CrudRepository<Voting, Integer> {
     void deleteAllByVotingSession(VotingSession votingSession);
 
+    void deleteAllByVotingSessionId(Integer votingSessionId);
+
     Integer countAllByVotingSession(VotingSession votingSession);
 
     @Query(value = "SELECT v FROM Voting v where v.votingSession.id=:votingSessionId and v.seq < v.votingSession.currentVotingSeq order by v.seq asc")

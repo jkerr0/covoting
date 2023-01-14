@@ -8,4 +8,5 @@ import lombok.Value;
 public class CurrentVotingInfo {
     Voting voting;
     Integer votingCount;
+    boolean sessionClosed;
 }

@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PresenceConfirmRepository extends JpaRepository<PresenceConfirm, PresenceConfirmId> {
     List<PresenceConfirm> findAllByVotingSessionId(Integer votingSessionId);
+
+    void deleteAllByVotingSessionId(Integer votingSessionId);
 }

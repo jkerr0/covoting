@@ -1,8 +1,9 @@
-import { Container } from "@mui/material";
+import { CircularProgress, Container } from "@mui/material";
 import PageHeader from "Components/PageHeader";
 import VotingSessionResults from "Components/VotingSessionResults";
 import WithNavbar from "Components/WithNavbar";
 import useNumberParam from "Hooks/useNumberParam";
+import useVotingSession from "Hooks/useVotingSession";
 import React, { FC } from "react";
 
 interface ResultPageProps {
@@ -11,11 +12,16 @@ interface ResultPageProps {
 
 const ResultsPage: FC<ResultPageProps> = ({ invalidParamUrl }) => {
   const sessionId = useNumberParam("id", invalidParamUrl);
+  const { votingSession, isLoading } = useVotingSession(sessionId);
 
   return (
     <WithNavbar>
       <Container maxWidth="xl">
-        <PageHeader>Voting session results</PageHeader>
+        {isLoading ? (
+          <CircularProgress />
+        ) : (
+          <PageHeader>{`Voting results for session: ${votingSession?.name}`}</PageHeader>
+        )}
         <VotingSessionResults sessionId={sessionId} />
       </Container>
     </WithNavbar>

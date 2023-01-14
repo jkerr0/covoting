@@ -78,6 +78,9 @@ export const VotingSessionList: FC = () => {
   };
 
   const Row = (votingSession: VotingSession) => {
+    const editDisabled =
+      votingSession.currentVotingSeq !== undefined &&
+      votingSession.currentVotingSeq > 0;
     return (
       <TableRow key={votingSession.id}>
         <TableCell>{votingSession.name}</TableCell>
@@ -88,8 +91,16 @@ export const VotingSessionList: FC = () => {
           <ButtonGroup>
             {userType === UserType.ADMIN && (
               <>
-                <Button onClick={() => handleEdit(votingSession)}>Edit</Button>
-                <Button onClick={() => deleteMutation.mutate(votingSession)}>
+                <Button
+                  onClick={() => handleEdit(votingSession)}
+                  disabled={editDisabled}
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => deleteMutation.mutate(votingSession)}
+                  disabled={editDisabled}
+                >
                   Delete
                 </Button>
                 <Button href={`/voting-control/${votingSession.id}`}>
@@ -100,7 +111,7 @@ export const VotingSessionList: FC = () => {
             {userType === UserType.VOTER && (
               <>
                 <Button href={`voting/${votingSession.id}`}>
-                  Go to voting
+                  Voting panel
                 </Button>
               </>
             )}

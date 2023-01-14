@@ -17,6 +17,7 @@ import useCurrentVoting from "Hooks/useCurrentVoting";
 import useCurrentVotingInfo from "Hooks/useCurrentVotingInfo";
 import useNumberParam from "Hooks/useNumberParam";
 import useVoteProgress from "Hooks/useVoteProgress";
+import useVotingSession from "Hooks/useVotingSession";
 import { FC } from "react";
 import { useStompClient } from "react-stomp-hooks";
 import { getAuthorizationHeader } from "Services/auth-service";
@@ -42,6 +43,9 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
   const currentVoting = useCurrentVoting(sessionId);
   const nextVotingHandler = useNextVotingHandler(sessionId, resetProgress);
 
+  const { votingSession, isLoading: isVotingSessionLoading } =
+    useVotingSession(sessionId);
+
   return (
     <WithNavbar>
       {isVotingInfoLoading ? (
@@ -52,7 +56,11 @@ const VotingControlPage: FC<VotingControlPageProps> = ({ invalidParamUrl }) => {
         </CenteredContainer>
       ) : (
         <Container maxWidth="xl" component={"div"}>
-          <PageHeader>Voting session control panel</PageHeader>
+          {isVotingSessionLoading ? (
+            <CircularProgress />
+          ) : (
+            <PageHeader>{`Voting session control panel for session: ${votingSession?.name}`}</PageHeader>
+          )}
           <Grid
             container
             justifyContent="space-around"

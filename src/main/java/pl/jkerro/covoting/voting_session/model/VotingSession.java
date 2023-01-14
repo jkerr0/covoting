@@ -33,6 +33,7 @@ public class VotingSession {
 
     private Boolean isPublished;
     private Integer currentVotingSeq;
+    private Boolean isClosed;
 
     public Optional<Voting> getCurrentVoting() {
         int votingIndex = currentVotingSeq - 1;
