@@ -57,5 +57,6 @@ public class VotingSession {
 
     public void setDefaultCurrentVotingSeq() {
         this.currentVotingSeq = 0;
+        this.isClosed = false;
     }
 }

@@ -3,79 +3,75 @@ import {
   capitalize,
   CardContent,
   FormControl,
+  FormHelperText,
   Grid,
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Stack,
   TextField,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import Card from "@mui/material/Card/Card";
-import { ChangeEvent, FC } from "react";
-import { MajorityType, Voting } from "Utils/data";
+import { FC } from "react";
+import { MajorityType } from "Utils/data";
 import Typography from "@mui/material/Typography";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import { getIn, useFormikContext } from "formik";
 
 interface VotingCardProps {
-  voting: Voting;
-  onVotingChanged: (voting: Voting) => void;
-  onVotingDelete: (voting: Voting) => void;
-  onVotingUp: (voting: Voting) => void;
-  onVotingDown: (voting: Voting) => void;
+  onVotingDelete: () => void;
+  onVotingUp: () => void;
+  onVotingDown: () => void;
+  index: number;
 }
 
 const VotingFormCard: FC<VotingCardProps> = ({
-  voting: votingInit,
-  onVotingChanged,
   onVotingDelete,
   onVotingDown,
-  onVotingUp
+  onVotingUp,
+  index,
 }) => {
-  const handleNameUpdate = (event: ChangeEvent<HTMLInputElement>) => {
-    onVotingChanged({
-      name: event.target.value as string,
-      seq: votingInit.seq,
-      majorityType: votingInit.majorityType,
-    });
-  };
+  interface FieldInterface {
+    name: string;
+    majorityType: string;
+  }
 
-  const handleMajorityTypeUpdate = (event: SelectChangeEvent) => {
-    const majorityType = event.target.value as MajorityType;
-    onVotingChanged({
-      name: votingInit.name,
-      seq: votingInit.seq,
-      majorityType,
-    });
-  };
+  interface FormInterface {
+    name: string;
+    startDate: Date;
+    votingList: FieldInterface[];
+  }
 
-  const cardTitle = `Voting #${votingInit.seq}`;
+  const cardTitle = `Voting #${index + 1}`;
 
   const DeleteButton = () => (
-    <Button onClick={() => onVotingDelete(votingInit)}>
+    <Button onClick={onVotingDelete}>
       <DeleteIcon />
     </Button>
   );
 
   const UpButton = () => (
-    <Button onClick={() => onVotingUp(votingInit)}>
+    <Button onClick={onVotingUp}>
       <ArrowUpwardIcon />
     </Button>
   );
 
   const DownButton = () => (
-    <Button onClick={() => onVotingDown(votingInit)}>
+    <Button onClick={onVotingDown}>
       <ArrowDownwardIcon />
     </Button>
   );
 
   const theme = useTheme();
   const smallBreakpoint = useMediaQuery(theme.breakpoints.down("md"));
+  const { values, errors, handleChange } =
+    useFormikContext<FormInterface>();
 
+  const arrError = getIn(errors, `votingList[${index}]`);
   return (
     <Card>
       <CardContent>
@@ -89,25 +85,34 @@ const VotingFormCard: FC<VotingCardProps> = ({
           <Grid item xl={10}>
             <Stack spacing={2}>
               <TextField
+                name={`votingList.${index}.name`}
                 key="name"
-                onChange={handleNameUpdate}
-                value={votingInit.name}
+                onChange={handleChange}
+                value={(values.votingList[index] && values.votingList[index].name) || ''}
+                error={Boolean(getIn(arrError, "name"))}
+                helperText={getIn(arrError, "name")}
                 label="Name"
               />
               <FormControl>
                 <InputLabel id="majority-field-label">Majority</InputLabel>
                 <Select
+                  name={`votingList.${index}.majorityType`}
                   labelId="majority-field-label"
                   label="Majority type"
-                  value={votingInit.majorityType}
-                  onChange={handleMajorityTypeUpdate}
+                  value={(values.votingList[index] && values.votingList[index].majorityType) || ''}
+                  error={Boolean(getIn(arrError, "majorityType"))}
+                  onChange={handleChange}
                 >
+                  <MenuItem/>
                   {Object.values(MajorityType).map((majorityType) => (
                     <MenuItem key={majorityType} value={majorityType}>
                       {capitalize(majorityType)}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText error={true}>
+                  {getIn(arrError, "majorityType")}
+                </FormHelperText>
               </FormControl>
             </Stack>
           </Grid>
