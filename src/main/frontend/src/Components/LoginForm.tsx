@@ -13,18 +13,37 @@ import { storeCredentials, Credentials } from "Services/auth-service";
 import { useMutation, useQueryClient } from "react-query";
 import { postLogin } from "Services/auth-api-service";
 import { AuthContext } from "Utils/AuthContext";
+import * as yup from "yup";
+import { useFormik } from "formik";
+
+const validationSchema = yup.object({
+  email: yup
+    .string()
+    .email("Enter a valid email")
+    .required("Email is required"),
+  password: yup.string().required("Password is required"),
+});
 
 export const LoginForm: FC = () => {
   const [invalidCredentials, isInvalidCredentials] = useState<boolean>(false);
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
   const { state } = useLocation();
   const tokenExpired: boolean = state ? state.tokenExpired : false;
 
   const authContext = useContext(AuthContext);
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      loginMutation.mutate(values);
+    },
+  });
+
 
   const handleLoginError = (error: AxiosError) => {
     if (error.response?.status === 401) {
@@ -43,38 +62,43 @@ export const LoginForm: FC = () => {
     onError: handleLoginError,
   });
 
-  const handleFormSubmit = () => {
-    loginMutation.mutate({ email, password });
-  };
-
   return (
     <Paper sx={{ p: 4 }} elevation={2}>
-      <Stack spacing={2}>
-        {invalidCredentials && (
-          <Alert severity="error">Invalid credentials</Alert>
-        )}
-        {tokenExpired && (
-          <Alert severity="info">
-            Your session expired. Please log in again.
-          </Alert>
-        )}
-        <Typography variant="h6" component="h1">
-          Login to co-voting
-        </Typography>
-        <TextField
-          type="email"
-          label="E-mail"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          type="password"
-          label="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button variant="contained" onClick={handleFormSubmit}>
-          Login
-        </Button>
-      </Stack>
+      <form onSubmit={formik.handleSubmit}>
+        <Stack spacing={2}>
+          {invalidCredentials && (
+            <Alert severity="error">Invalid credentials</Alert>
+          )}
+          {tokenExpired && (
+            <Alert severity="info">
+              Your session expired. Please log in again.
+            </Alert>
+          )}
+          <Typography variant="h6" component="h1">
+            Login to co-voting
+          </Typography>
+          <TextField
+            id="email"
+            label="E-mail"
+            onChange={formik.handleChange}
+            value={formik.values.email}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+          />
+          <TextField
+            id="password"
+            type="password"
+            label="Password"
+            onChange={formik.handleChange}
+            value={formik.values.password}
+            error={formik.touched.password && Boolean(formik.touched.password)}
+            helperText={formik.touched.password && formik.touched.password}
+          />
+          <Button variant="contained" type="submit">
+            Login
+          </Button>
+        </Stack>
+      </form>
     </Paper>
   );
 };

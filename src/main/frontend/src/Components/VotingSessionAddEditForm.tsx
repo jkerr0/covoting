@@ -8,13 +8,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { FC, useState } from "react";
-import { MajorityType, Voting, VotingSession } from "Utils/data";
+import { FC } from "react";
+import { Voting, VotingSession } from "Utils/data";
 import moment from "moment";
 import useErrorHandler from "Hooks/useErrorHandler";
 import AddIcon from "@mui/icons-material/Add";
-import useEntityWithSeqList from "Hooks/useEntityWithSeqList";
-import VotingFormCard from "Components/VotingFormCard";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   getVotingSessionVotingList,
@@ -24,6 +22,9 @@ import {
 } from "Services/voting-session-api-service";
 import Queries from "Utils/queries";
 import { AxiosError } from "axios";
+import * as yup from "yup";
+import { FieldArray, FormikProvider, useFormik } from "formik";
+import VotingFormCard from "Components/VotingFormCard";
 
 interface AddEditFormProps {
   isAdd: boolean;
@@ -33,39 +34,28 @@ interface AddEditFormProps {
 
 const DATE_FORMAT: string = "yyyy-MM-DDThh:mm";
 
+const validationSchema = yup.object({
+  name: yup.string().required("Session name is required"),
+  startDate: yup.date().required(),
+  published: yup.boolean(),
+  votingList: yup.array().of(
+    yup.object().shape({
+      name: yup.string().required("Voting name is required"),
+      majorityType: yup.string().required("Majority type is required"),
+    })
+  ),
+});
+
 export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
   isAdd,
   votingSession,
   afterSave,
 }) => {
-  const [
-    votingList,
-    setVotingList,
-    addVoting,
-    updateVoting,
-    deleteVoting,
-    votingDown,
-    votingUp,
-  ] = useEntityWithSeqList<Voting>();
-
-  const [name, setName] = useState<string | undefined>(
-    isAdd ? undefined : votingSession?.name
-  );
-  const [date, setDate] = useState<string>(
-    isAdd || votingSession === undefined
-      ? moment().format(DATE_FORMAT)
-      : moment(votingSession.startDate).format(DATE_FORMAT)
-  );
   const defaultErrorHandler = useErrorHandler();
 
-  const [isPublished, setIsPublished] = useState(
-    isAdd || votingSession === undefined ? false : votingSession.isPublished
-  );
-
   const afterMutationSuccess = () => {
-    queryClient
-      .invalidateQueries([Queries.VOTING_SESSIONS, getVotingListQueryName()])
-      .then(() => afterSave());
+    queryClient.invalidateQueries(getVotingListQueryName());
+    queryClient.refetchQueries(Queries.VOTING_SESSIONS).then(() => afterSave());
   };
 
   const queryClient = useQueryClient();
@@ -81,109 +71,128 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
 
   const getVotingListQueryName = () => `voting-list-${votingSession?.id}`;
 
-  const { error } = useQuery<Voting[], AxiosError>(
+  useQuery<Voting[], AxiosError>(
     getVotingListQueryName(),
     () => getVotingSessionVotingList(votingSession),
     {
       enabled: !!votingSession,
-      onSuccess: (votingList) => setVotingList(votingList),
+      onSuccess: (list) => formik.setFieldValue("votingList", list),
+      onError: defaultErrorHandler,
     }
   );
-  useErrorHandler(error);
 
-  const handleSave = () => {
-    isAdd ? handleSaveAdd() : handleSaveEdit();
-  };
+  type VotingNoSeq = Omit<Voting, "seq">;
 
-  const handleSaveEdit = () => {
-    if (!votingSession?.id || name === undefined) {
-      throw new Error("Invalid edited session");
-    }
-    const editedSession: VotingSession = {
-      id: votingSession.id,
-      isPublished,
-      name,
-      startDate: moment(date).toISOString(),
-      votingList,
-    };
-    editMutation.mutate(editedSession);
-  };
-
-  const handleSaveAdd = () => {
-    if (!name) {
-      throw new Error("Name not defined");
-    }
-    const newSession: NewVotingSession = {
-      name,
-      isPublished,
-      startDate: moment(date).toISOString(),
-      votingList,
-    };
-    addMutation.mutate(newSession);
-  };
-
-  const handleVotingAdd = () => {
-    const defaultVoting: Voting = {
-      seq: 0,
-      name: "",
-      majorityType: MajorityType.SIMPLE,
-    };
-    addVoting(defaultVoting);
-  };
+  const formik = useFormik({
+    initialValues: {
+      name: isAdd ? "" : votingSession?.name,
+      startDate:
+        isAdd || votingSession === undefined
+          ? moment().format(DATE_FORMAT)
+          : moment(votingSession.startDate).format(DATE_FORMAT),
+      isPublished: votingSession?.isPublished || false,
+      votingList: new Array<VotingNoSeq>(),
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      const votingList: Voting[] = values.votingList.map((voting, index) => {
+        return {
+          seq: index + 1,
+          name: voting.name,
+          majorityType: voting.majorityType,
+        };
+      });
+      console.log("Saving");
+      console.log(values);
+      if (values.name && values.startDate) {
+        const addedVotingSession: NewVotingSession = {
+          name: values.name,
+          startDate: values.startDate,
+          isPublished: values.isPublished,
+          votingList,
+        };
+        console.log(addedVotingSession);
+        if (!isAdd && votingSession) {
+          const editedVotingSession: VotingSession = {
+            id: votingSession.id,
+            ...addedVotingSession,
+          };
+          editMutation.mutate(editedVotingSession);
+        } else {
+          addMutation.mutate(addedVotingSession);
+        }
+      }
+    },
+  });
 
   return (
     <Box sx={{ m: 2, p: 5 }}>
-      <Stack spacing={2}>
-        <Typography variant="h6" component="h2">
-          {isAdd ? "Add session" : "Edit session"}
-        </Typography>
-        <TextField
-          label="Voting session name"
-          placeholder="Name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-        <TextField
-          value={date}
-          onChange={(event) =>
-            setDate(moment(event.target.value).format(DATE_FORMAT))
-          }
-          id="datetime-local"
-          label="Voting session start date"
-          type="datetime-local"
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-        <FormGroup row>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isPublished}
-                onChange={(e) => setIsPublished(e.target.checked)}
+      <FormikProvider value={formik}>
+        <form onSubmit={formik.handleSubmit}>
+          <Stack spacing={2}>
+            <Typography variant="h6" component="h2">
+              {isAdd ? "Add session" : "Edit session"}
+            </Typography>
+            <TextField
+              id="name"
+              label="Voting session name"
+              placeholder="Name"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              error={Boolean(formik.errors.name)}
+              helperText={formik.errors.name}
+            />
+            <TextField
+              id="startDate"
+              value={formik.values.startDate}
+              onChange={formik.handleChange}
+              label="Voting session start date"
+              type="datetime-local"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <FormGroup row>
+              <FormControlLabel
+                control={
+                  <Switch
+                    id="isPublished"
+                    checked={formik.values.isPublished}
+                    onChange={formik.handleChange}
+                  />
+                }
+                label="Publish voting session"
+                labelPlacement="start"
               />
-            }
-            label="Publish voting session"
-            labelPlacement="start"
-          />
-        </FormGroup>
-        {votingList.map((voting, index) => (
-          <VotingFormCard
-            key={`voting-${index}`}
-            voting={voting}
-            onVotingChanged={updateVoting}
-            onVotingDelete={deleteVoting}
-            onVotingDown={votingDown}
-            onVotingUp={votingUp}
-          />
-        ))}
-        <Button onClick={handleVotingAdd} startIcon={<AddIcon />}>
-          Add voting
-        </Button>
-        <Button onClick={handleSave} variant="contained">
-          Save
-        </Button>
-      </Stack>
+            </FormGroup>
+            <FieldArray
+              name="votingList"
+              render={({ remove, swap, push }) => (
+                <>
+                  {formik.values.votingList.map((v, index) => (
+                    <VotingFormCard
+                      key={`voting-${index}`}
+                      onVotingDelete={() => remove(index)}
+                      onVotingDown={() =>
+                        index + 1 < formik.values.votingList.length &&
+                        swap(index, index + 1)
+                      }
+                      onVotingUp={() => index > 0 && swap(index, index - 1)}
+                      index={index}
+                    />
+                  ))}
+                  <Button onClick={() => push({})} startIcon={<AddIcon />}>
+                    Add voting
+                  </Button>
+                </>
+              )}
+            />
+            <Button type="submit" variant="contained">
+              Save
+            </Button>
+          </Stack>
+        </form>
+      </FormikProvider>
     </Box>
   );
 };
