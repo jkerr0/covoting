@@ -36,11 +36,12 @@ const ConfirmPresenceButton: FC<ConfirmPresenceButtonProps> = ({
 
 const useConfirmPresenceHandler = (sessionId: number) => {
   const stompClient = useStompClient();
-  return () =>
+  return () => {
     stompClient?.publish({
       destination: `/app/session/${sessionId}/presence-confirm`,
       headers: { Authorization: getAuthorizationHeader() },
     });
+  }
 };
 
 export default ConfirmPresenceButton;

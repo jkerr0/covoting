@@ -29,6 +29,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
     @Override
     public void createVotingSession(VotingSession session) {
         session.setDefaultCurrentVotingSeq();
+        session.setIsClosed(false);
         votingSessionRepository.save(session);
         saveSessionVotingList(session);
     }
@@ -43,6 +44,10 @@ public class VotingSessionServiceImpl implements VotingSessionService {
                 .map(VotingSession::getCurrentVotingSeq)
                 .ifPresentOrElse(session::setCurrentVotingSeq,
                         session::setDefaultCurrentVotingSeq);
+
+        if (session.getIsClosed() == null) {
+            session.setIsClosed(false);
+        }
 
         votingSessionRepository.save(session);
         votingRepository.deleteAllByVotingSession(session);
@@ -121,10 +126,7 @@ public class VotingSessionServiceImpl implements VotingSessionService {
     @Transactional
     @Override
     public void castVote(Integer sessionId, String email, VoteType voteType) {
-        Integer currentVotingId = findVotingSessionCurrentVotingInfoById(sessionId)
-                .map(CurrentVotingInfo::getVoting)
-                .map(Voting::getId)
-                .orElseThrow();
+        Integer currentVotingId = findCurrentVoting(sessionId).map(Voting::getId).orElseThrow();
 
         ApplicationUser user = getUser(email);
 

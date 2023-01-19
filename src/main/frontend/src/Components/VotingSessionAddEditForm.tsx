@@ -32,7 +32,7 @@ interface AddEditFormProps {
   afterSave: () => void;
 }
 
-const DATE_FORMAT: string = "yyyy-MM-DDThh:mm";
+const DATE_FORMAT: string = "yyyy-MM-DDTHH:mm";
 
 const validationSchema = yup.object({
   name: yup.string().required("Session name is required"),
@@ -102,16 +102,13 @@ export const VotingSessionAddEditForm: FC<AddEditFormProps> = ({
           majorityType: voting.majorityType,
         };
       });
-      console.log("Saving");
-      console.log(values);
       if (values.name && values.startDate) {
         const addedVotingSession: NewVotingSession = {
           name: values.name,
-          startDate: values.startDate,
+          startDate: moment(values.startDate).toISOString(),
           isPublished: values.isPublished,
           votingList,
         };
-        console.log(addedVotingSession);
         if (!isAdd && votingSession) {
           const editedVotingSession: VotingSession = {
             id: votingSession.id,

@@ -28,8 +28,8 @@ const VotingPresenceCard: FC<VotingPresenceCardProps> = ({ sessionId }) => {
         ) : (
           presentList && (
             <List>
-              {presentList.map((user) => (
-                <ListItem>
+              {presentList.map((user, index) => (
+                <ListItem key={index}>
                   <ListItemAvatar>
                     <Avatar />
                   </ListItemAvatar>

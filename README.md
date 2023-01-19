@@ -2,24 +2,34 @@
 
 ## Zaimplementowane elementy
 - ekran logowania
-- panel do zarządzania posiedzeniami (bez możliwości dodawania głosowań)
+- panel planowania posiedzeń
+- panel zarządzania posiedzeniem
+- panel do głosowania
 
 ## Uruchomienie aplikacji
-Aplikację można uruchomić przy pomocy aplikacji docker i docker-compose wywołując polecenia (obrazy budowane lokalnie):
+Bazę danych i kolejkę RabbitMQ można uruchomić przy pomocy aplikacji docker i docker-compose wywołując polecenia:
 ``` shell
 $ docker-compose build
 $ docker-compose up -d
 ```
-Alternatywnie można wykorzystać zbudowane wcześniej obrazy umieszczone na hub.docker.com:
-``` shell
-$ docker-compose pull
-$ docker-compose up -d
+*wymagane jest zainstalowanie aplikacji Docker
+
+Aplikację-serwer można uruchomić poprzez IDE IntelliJ IDEA, klasa `CovotingApplication` jest klasą "wejściową", zawierającą metodę `main`
+(JDK 17)
+
+Aplikację-klienta można uruchomić wywołując polecenia:
+```shell
+$ cd src/main/frontend
+$ npm install
+$ npm start
 ```
-Aby wyłączyć aplikację można wywołać polecenie:
+*wymagane jest zainstalowanie Node.js
+
+Aby wyłączyć serwery bazy danych i kolejki wiadomości można wywołać polecenie:
 ``` shell
 $ docker-compose stop
 ```
-Aby wyłączyć aplikację i usunąć kontenery należy wywołać polecenie:
+Aby wyłączyć i usunąć kontenery należy wywołać polecenie:
 ``` shell
 $ docker-compose down
 ```

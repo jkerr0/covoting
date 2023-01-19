@@ -7,9 +7,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableFooter,
   TableHead,
-  TablePagination,
   TableRow,
 } from "@mui/material";
 import { FC, useContext, useState } from "react";
@@ -29,7 +27,7 @@ import { AuthContext } from "Utils/AuthContext";
 import { UserType } from "Services/auth-service";
 import { modalStyle } from "Utils/modal-style";
 
-const DATE_FORMAT: string = "DD.MM.yyyy hh:mm";
+const DATE_FORMAT: string = "DD.MM.yyyy HH:mm";
 
 export const VotingSessionList: FC = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -162,18 +160,6 @@ export const VotingSessionList: FC = () => {
           <TableBody>
             {votingSessions && votingSessions.map((session) => Row(session))}
           </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[10]}
-                rowsPerPage={10}
-                page={0}
-                count={1}
-                onPageChange={() => {}}
-                onRowsPerPageChange={() => {}}
-              />
-            </TableRow>
-          </TableFooter>
         </Table>
       </TableContainer>
       <FormModal />

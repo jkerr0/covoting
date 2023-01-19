@@ -32,7 +32,8 @@ public class VotingSessionLiveController {
     public void handleNextVoting(@DestinationVariable Integer sessionId,
                                  @Header(name = "Authorization") String authorizationHeader) {
 
-        String email = jwtTokenService.findUsernameFromHeader(authorizationHeader).orElseThrow();
+        String email = jwtTokenService.findUsernameFromHeader(authorizationHeader)
+                .orElseThrow();
         if (!userService.isAdmin(email)) {
             return ;
         }
@@ -43,8 +44,10 @@ public class VotingSessionLiveController {
 
         Optional<Voting> votingOptional = votingSessionService.proceedToNextVoting(sessionId, email);
 
-        votingOptional.ifPresent(voting -> simpMessagingTemplate.convertAndSend(String.format("/topic/current-voting.%d", sessionId), voting));
-        resultOptional.ifPresent(result -> simpMessagingTemplate.convertAndSend(String.format("/topic/new-result.%d", sessionId), result));
+        votingOptional.ifPresent(voting ->
+                simpMessagingTemplate.convertAndSend(String.format("/topic/current-voting.%d", sessionId), voting));
+        resultOptional.ifPresent(result ->
+                simpMessagingTemplate.convertAndSend(String.format("/topic/new-result.%d", sessionId), result));
     }
 
     @MessageMapping("vote")

@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import useIsUserPresent from "Hooks/useIsUserPresent";
 import { FC, MouseEventHandler, useState } from "react";
 import { useStompClient } from "react-stomp-hooks";
 import { getAuthorizationHeader } from "Services/auth-service";
@@ -60,6 +61,8 @@ const VoteCastCard: FC<VoteCastCardProps> = ({
 }) => {
   const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const [voteType, setVoteType] = useState<VoteType | undefined>();
+  const { isUserPresent, isLoading: isUserPresentLoading } =
+    useIsUserPresent(sessionId);
 
   const voteHandler = useVoteCastHandler(sessionId);
 
@@ -98,9 +101,9 @@ const VoteCastCard: FC<VoteCastCardProps> = ({
       <Card style={{ height: "100%" }}>
         <CardHeader title={"Cast a vote"} />
         <CardContent>
-          {isLoading ? (
+          {isLoading || isUserPresentLoading ? (
             <CircularProgress />
-          ) : votingEnabled ? (
+          ) : votingEnabled && isUserPresent ? (
             <Box sx={{ display: "flex" }} justifyContent="space-around" gap={2}>
               <VoteButton color="success" onClick={() => handleVote("for")}>
                 Vote for
@@ -114,9 +117,11 @@ const VoteCastCard: FC<VoteCastCardProps> = ({
             </Box>
           ) : (
             <Typography>
-              {noNextVoting
-                ? "There will be no more votings."
-                : "Please wait for the next voting."}
+              {isUserPresent
+                ? noNextVoting
+                  ? "There will be no more votings."
+                  : "Please wait for the next voting."
+                : "Sorry you haven't confirmed your presence."}
             </Typography>
           )}
         </CardContent>

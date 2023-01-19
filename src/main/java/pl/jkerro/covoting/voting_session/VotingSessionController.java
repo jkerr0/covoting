@@ -32,10 +32,8 @@ public class VotingSessionController {
     }
 
     @GetMapping("{id}/present_list")
-    public List<ApplicationUser> getPresentUsersFullNames(@PathVariable Integer id) {
-        return votingSessionService.getPresentUsers(id)
-                .stream()
-                .toList();
+    public List<ApplicationUser> getPresentUsers(@PathVariable Integer id) {
+        return votingSessionService.getPresentUsers(id);
     }
 
     @GetMapping("{id}/results")
